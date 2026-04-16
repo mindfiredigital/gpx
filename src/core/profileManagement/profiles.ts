@@ -72,4 +72,11 @@ const getActiveProfileName = (): string | null => {
   return active.global;
 };
 
-export { validateProfileName, getProfile, listProfiles, addProfile, updateProfile, removeProfile };
+export {
+  validateProfileName,
+  getProfile,
+  listProfiles,
+  addProfile,
+  updateProfile,
+  removeProfile
+}
