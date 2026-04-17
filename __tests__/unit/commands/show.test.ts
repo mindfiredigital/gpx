@@ -84,7 +84,7 @@ describe('show command', () => {
         const code = await runShowCommand('work', true);
 
         expect(code).toBe(ExitCode.SUCCESS);
-        const result = JSON.parse(consoleOutput[0] as string);
+        const result = JSON.parse(consoleOutput[0]);
         expect(result).toMatchObject({
             success: true,
             data: {
