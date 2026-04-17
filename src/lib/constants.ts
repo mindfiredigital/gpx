@@ -19,6 +19,16 @@ const GPX_DIR: string = path.join(HOME_DIR, '.gpx');
 const BACKUP_DIR = path.join(GPX_DIR, 'backups');
 const PROFILES_PATH: string = path.join(GPX_DIR, 'profiles.json');
 const ACTIVE_PATH: string = path.join(GPX_DIR, 'active.json');
+const CONFIG_PATH: string = path.join(GPX_DIR, 'config.json');
 const LOCK_PATH: string = path.join(GPX_DIR, '.lock');
 
-export { ExitCode, HOME_DIR, GPX_DIR, BACKUP_DIR, PROFILES_PATH, ACTIVE_PATH, LOCK_PATH };
+export {
+  ExitCode,
+  HOME_DIR,
+  GPX_DIR,
+  BACKUP_DIR,
+  PROFILES_PATH,
+  ACTIVE_PATH,
+  CONFIG_PATH,
+  LOCK_PATH,
+};
