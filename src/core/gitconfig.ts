@@ -77,11 +77,8 @@ const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): 
   if (profile.gpg_key) {
     run(`git config ${flag} user.signingkey "${profile.gpg_key}"`);
   } else {
-    try {
-      run(`git config ${flag} --unset user.signingkey`);
-    } catch {
-      throw new ProfileError('enable to perform the action', ExitCode.INVALID_INPUT);
-    }
+    const existingSigningKey = safeGet(`git config ${flag} --get user.signingkey`);
+    if (existingSigningKey) run(`git config ${flag} --unset user.signingkey`);
   }
 
   if (profile.signing_commits === true) {
