@@ -16,7 +16,9 @@ export const runUseCommand = async (
       throw new ProfileError(`Profile not found: ${profileName}`, ExitCode.PROFILE_NOT_FOUND);
     }
 
-    applyProfileToGitConfig(profile, local ? 'local' : 'global');
+    const scope = local ? 'local' : 'global';
+
+    applyProfileToGitConfig(profile, scope);
 
     if (!local) {
       await saveActive({
@@ -30,14 +32,14 @@ export const runUseCommand = async (
         name: profile.name,
         display_name: profile.display_name,
         email: profile.email,
-        scope: local ? 'local' : 'global',
+        scope,
       },
     };
 
     if (json) {
       printJson({ success: true, data: payload });
     } else {
-      printSuccess(`Switched to ${profile.name}${local ? ' (local)' : ' (global)'}`);
+      printSuccess(`Switched to ${profile.name} (${scope})`);
     }
 
     return ExitCode.SUCCESS;

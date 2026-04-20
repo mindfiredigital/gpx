@@ -1,17 +1,10 @@
 import path from 'node:path';
 import { execSync } from 'node:child_process';
-import type { Profile } from '../lib/types';
+import type { Profile } from '../lib/types/Profile.type';
+import type { GitScope, GitIdentity } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
 import { ProfileError } from './profileManagement/errorClass';
 import { backupFile } from './profileManagement/storeBackup';
-
-type GitScope = 'global' | 'local';
-
-type GitIdentity = {
-  name: string | null;
-  email: string | null;
-  signingKey: string | null;
-};
 
 const run = (cmd: string): string => {
   return execSync(cmd, { encoding: 'utf-8' }).trim();
@@ -77,11 +70,8 @@ const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): 
   if (profile.gpg_key) {
     run(`git config ${flag} user.signingkey "${profile.gpg_key}"`);
   } else {
-    try {
-      run(`git config ${flag} --unset user.signingkey`);
-    } catch {
-      throw new ProfileError('enable to perform the action', ExitCode.INVALID_INPUT);
-    }
+    const existingSigningKey = safeGet(`git config ${flag} --get user.signingkey`);
+    if (existingSigningKey) run(`git config ${flag} --unset user.signingkey`);
   }
 
   if (profile.signing_commits === true) {

@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import type { ProfilesStore } from '../../lib/types';
+import type { ProfilesStore } from '../../lib/types/Profile.type';
 import { ensureGpxDir } from './directorySetup';
 import { atomicWrite } from './atomicWrite';
 import { PROFILES_PATH } from '../../lib/constants';
