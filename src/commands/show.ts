@@ -22,15 +22,18 @@ export const runShowCommand = async (profileName: string, json: boolean): Promis
       return ExitCode.SUCCESS;
     }
 
-    printHuman(`Profile: ${profile.name}`);
-    printHuman(`Display name: ${profile.display_name}`);
-    printHuman(`Email: ${profile.email}`);
-    printHuman(`SSH key: ${profile.ssh_key ?? 'not set'}`);
-    printHuman(`GPG key: ${profile.gpg_key ?? 'not set'}`);
-    printHuman(`Signing commits: ${profile.signing_commits ? 'enabled' : 'disabled'}`);
-    printHuman(`Created at: ${profile.created_at}`);
-    printHuman(`Last used at: ${profile.last_used_at ?? 'never'}`);
-    printHuman(`Active: ${active === profile.name ? 'yes' : 'no'}`);
+    const humanOutputData = [
+      `Profile: ${profile.name}`,
+      `Display name: ${profile.display_name}`,
+      `Email: ${profile.email}`,
+      `SSH key: ${profile.ssh_key ?? 'not set'}`,
+      `GPG key: ${profile.gpg_key ?? 'not set'}`,
+      `Signing commits: ${profile.signing_commits ? 'enabled' : 'disabled'}`,
+      `Created at: ${profile.created_at}`,
+      `Last used at: ${profile.last_used_at ?? 'never'}`,
+      `Active: ${payload.active ? 'yes' : 'no'}`,
+    ];
+    humanOutputData.forEach(printHuman);
 
     return ExitCode.SUCCESS;
   } catch (error) {
