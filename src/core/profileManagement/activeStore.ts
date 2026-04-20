@@ -1,10 +1,10 @@
 import fs from 'node:fs';
-import type { ActiveStore } from '../../lib/types';
 import { ensureGpxDir } from './directorySetup';
 import { atomicWrite } from './atomicWrite';
 import { ACTIVE_PATH } from '../../lib/constants';
 import { withLock } from './fileLocking';
 import { backupFile } from './storeBackup';
+import type { ActiveStore } from '../../lib/types/ActiveStore.type';
 
 // Active store
 const loadActive = (): ActiveStore => {

@@ -1,10 +1,10 @@
 import fs from 'node:fs';
-import type { GpxConfig } from '../../lib/types';
 import { ensureGpxDir } from './directorySetup';
 import { atomicWrite } from './atomicWrite';
 import { CONFIG_PATH } from '../../lib/constants';
 import { withLock } from './fileLocking';
 import { backupFile } from './storeBackup';
+import type { GpxConfig } from '../../lib/types/GpxConfig.type';
 
 const defaultConfig = (): GpxConfig => ({
   auto_detect: false,
