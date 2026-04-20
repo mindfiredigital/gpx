@@ -9,13 +9,7 @@ import { runCurrentCommand } from './commands/current';
 import { runRemoveCommand } from './commands/remove';
 import { runShowCommand } from './commands/show';
 import { setOutputFlags } from './utils/output';
-
-type GlobalCliOptions = {
-  json?: boolean;
-  noInteractive?: boolean;
-  noColor?: boolean;
-  quiet?: boolean;
-};
+import type { GlobalCliOptions } from './lib/types/GpxConfig.type';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')

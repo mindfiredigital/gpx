@@ -1,17 +1,10 @@
 import path from 'node:path';
 import { execSync } from 'node:child_process';
-import type { Profile } from '../lib/types';
+import type { Profile } from '../lib/types/Profile.type';
+import type { GitScope, GitIdentity } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
 import { ProfileError } from './profileManagement/errorClass';
 import { backupFile } from './profileManagement/storeBackup';
-
-type GitScope = 'global' | 'local';
-
-type GitIdentity = {
-  name: string | null;
-  email: string | null;
-  signingKey: string | null;
-};
 
 const run = (cmd: string): string => {
   return execSync(cmd, { encoding: 'utf-8' }).trim();

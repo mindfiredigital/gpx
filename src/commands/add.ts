@@ -3,17 +3,7 @@ import { ExitCode } from '../lib/constants';
 import { ask } from '../utils/prompt';
 import { handleCommandError, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
-
-interface AddArgs {
-  name: string;
-  displayName?: string;
-  email?: string;
-  sshKey?: string;
-  gpgKey?: string;
-  signing?: boolean;
-  noInteractive?: boolean;
-  json?: boolean;
-}
+import type { AddArgs } from '../lib/types/AddCommand.type';
 
 export const runAddCommand = async (args: AddArgs): Promise<number> => {
   try {
