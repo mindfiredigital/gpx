@@ -17,6 +17,8 @@ enum ExitCode {
 const HOME_DIR: string = os.homedir();
 const GPX_DIR: string = path.join(HOME_DIR, '.gpx');
 const BACKUP_DIR = path.join(GPX_DIR, 'backups');
+const SSH_DIR: string = path.join(os.homedir(), '.ssh');
+const SSH_CONFIG_PATH: string = path.join(SSH_DIR, 'config');
 const PROFILES_PATH: string = path.join(GPX_DIR, 'profiles.json');
 const ACTIVE_PATH: string = path.join(GPX_DIR, 'active.json');
 const CONFIG_PATH: string = path.join(GPX_DIR, 'config.json');
@@ -27,6 +29,8 @@ export {
   HOME_DIR,
   GPX_DIR,
   BACKUP_DIR,
+  SSH_DIR,
+  SSH_CONFIG_PATH,
   PROFILES_PATH,
   ACTIVE_PATH,
   CONFIG_PATH,
