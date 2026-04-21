@@ -2,8 +2,10 @@ import { getProfile } from '../core/profileManagement/profiles';
 import { saveActive } from '../core/profileManagement/activeStore';
 import { applyProfileToGitConfig } from '../core/gitconfig';
 import { ExitCode } from '../lib/constants';
-import { handleCommandError, printJson, printSuccess } from '../utils/output';
+import { handleCommandError, printJson, printSuccess, printWarn } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
+import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
+import { validateSshKeyForProfile } from '../core/sshConfigManagement/sshKeyExistencePermissionCheck';
 
 export const runUseCommand = async (
   profileName: string,
@@ -20,6 +22,21 @@ export const runUseCommand = async (
 
     applyProfileToGitConfig(profile, scope);
 
+    const warnings: string[] = [];
+    if (profile.ssh_key) {
+      const sshValidation = validateSshKeyForProfile(profile);
+      if (!sshValidation.exists) {
+        warnings.push(
+          `SSH key not found: ${profile.ssh_key}.\nGit identity switched successfully.\nFix: run gpx doctor ${profile.name} to diagnose SSH issues.`
+        );
+      } else {
+        if (!sshValidation.permissionOk) {
+          warnings.push(`SSH key permissions not strict: ${profile.ssh_key}`);
+        }
+        await upsertSshConfigForProfile(profile);
+      }
+    }
+
     if (!local) {
       await saveActive({
         global: profile.name,
@@ -34,12 +51,14 @@ export const runUseCommand = async (
         email: profile.email,
         scope,
       },
+      warnings,
     };
 
     if (json) {
       printJson({ success: true, data: payload });
     } else {
       printSuccess(`Switched to ${profile.name} (${scope})`);
+      for (const warning of warnings) printWarn(`Warning: ${warning}`);
     }
 
     return ExitCode.SUCCESS;
