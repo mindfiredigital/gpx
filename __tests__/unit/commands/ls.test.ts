@@ -56,7 +56,7 @@ describe('ls command', () => {
         const code = await runLsCommand(true);
 
         expect(code).toBe(ExitCode.SUCCESS);
-        const result = JSON.parse(consoleOutput[0]);
+        const result = JSON.parse(consoleOutput[0] as string);
 
         expect(result).toMatchObject({
             success: true,
