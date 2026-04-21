@@ -1,6 +1,7 @@
 import { removeProfile } from '../core/profileManagement/profiles';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess } from '../utils/output';
+import { removeSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 
 export const runRemoveCommand = async (
   profileName: string,
@@ -9,6 +10,7 @@ export const runRemoveCommand = async (
 ): Promise<number> => {
   try {
     await removeProfile(profileName, force);
+    await removeSshConfigForProfile(profileName);
 
     if (json) {
       printJson({
