@@ -89,6 +89,7 @@ export const runUseCommand = async (
     } else {
       for (const warning of warnings) printWarn(`Warning: ${warning}`);
       printSuccess(`Switched to ${profile.name} (${scope})`);
+      for (const warning of warnings) printWarn(`Warning: ${warning}`);
     }
 
     return ExitCode.SUCCESS;
