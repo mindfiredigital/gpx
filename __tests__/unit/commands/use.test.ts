@@ -74,7 +74,7 @@ describe('use command', () => {
         const code = await runUseCommand('work', false, true);
 
         expect(code).toBe(ExitCode.SUCCESS);
-        const result = JSON.parse(consoleOutput[0]);
+        const result = JSON.parse(consoleOutput[0] as string);
         expect(result).toMatchObject({
             success: true,
             data: {

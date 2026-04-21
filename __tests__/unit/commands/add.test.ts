@@ -87,7 +87,7 @@ describe('add command', () => {
             json: true,
         });
 
-        const result = JSON.parse(consoleOutput[0]);
+        const result = JSON.parse(consoleOutput[0] as string);
         expect(result).toMatchObject({
             success: true,
             data: {
