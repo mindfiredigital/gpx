@@ -3,6 +3,7 @@ export interface AddArgs {
   displayName?: string;
   email?: string;
   sshKey?: string;
+  generateSsh?: boolean;
   gpgKey?: string;
   signing?: boolean;
   noInteractive?: boolean;
