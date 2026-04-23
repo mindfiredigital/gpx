@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 const buildBashInitScript = (): string => {
   return `_get_current_profile_name() {
+=======
+/* eslint-disable no-useless-escape */
+
+const buildBashInitScript = (): string => {
+  return `get_current_profile_name() {
+>>>>>>> b080bb3 (fix: update shell.ts - prompt_badge(active_profile))
     local line
     line="$(gpx current 2>/dev/null | head -n 1)"
     if [[ "$line" == *"Active profile: "* ]]; then
@@ -9,6 +16,7 @@ const buildBashInitScript = (): string => {
     fi
 }
 
+<<<<<<< HEAD
 if [[ ! "$PROMPT_COMMAND" == *"_get_current_profile_name"* ]]; then
     PROMPT_COMMAND="\${PROMPT_COMMAND}_get_current_profile_name;"
 fi
@@ -16,6 +24,13 @@ fi
 PS1='\\]\\[\\033]0;$TITLEPREFIX:$PWD\\007\\]\\\n\\[\\033[32m\\]\\u@\\h \\[\\033[35m\\]$MSYSTEM \\[\\033[33m\\]\\w\\[\\033[36m\\]\`__git_ps1\`\\[\\033[31m\\]$ACTIVE_PROFILE\\[\\033[0m\\]\\n$ '
 
 bind 'TAB:menu-complete'`;
+=======
+PS1='\\]\\\[\\033]0;$TITLEPREFIX:$PWD\\007\\\]\\\n\\\[\\033[32m\\\]\\u@\\h \\\[\\033[35m\\\]$MSYSTEM \\\[\\033[33m\\\]\\\w\\\[\\033[36m\\\]\`__git_ps1\`\\\[\\033[31m\\\]$ACTIVE_PROFILE\\\[\\033[0m\\\]\\n$ '
+
+if [[ ! "$PROMPT_COMMAND" == *"get_current_profile_name"* ]]; then
+    PROMPT_COMMAND="\${PROMPT_COMMAND}get_current_profile_name;"
+fi`;
+>>>>>>> b080bb3 (fix: update shell.ts - prompt_badge(active_profile))
 };
 
 const buildBashCompletionScript = (): string => {
