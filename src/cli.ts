@@ -8,6 +8,7 @@ import { runUseCommand } from './commands/use';
 import { runCurrentCommand } from './commands/current';
 import { runRemoveCommand } from './commands/remove';
 import { runShowCommand } from './commands/show';
+import { runInitCommand } from './commands/init';
 import { setOutputFlags } from './utils/output';
 import type { GlobalCliOptions } from './lib/types/GpxConfig.type';
 
@@ -106,6 +107,17 @@ await yargs(hideBin(process.argv))
     () => {},
     async (argv: any) => {
       process.exitCode = await runCurrentCommand(argv.json);
+    }
+  )
+  .command(
+    'init',
+    'Initialize shell support and prompt badge',
+    (builder: any) => builder.option('shell', { type: 'string', choices: ['bash', 'zsh', 'fish'] }),
+    async (argv: any) => {
+      process.exitCode = await runInitCommand({
+        shell: argv.shell,
+        json: argv.json,
+      });
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')
