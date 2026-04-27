@@ -6,9 +6,11 @@ import { handleCommandError, printSuccess, printHuman, printJson } from '../util
 import { getShellConfig } from '../utils/shell/getShell';
 import { buildBashInitScript, buildBashCompletionScript } from '../utils/shell/bashShellScripts';
 import type { InitArgs } from '../lib/types/InitCommand.type';
+import { ProfileError } from '../core/profileManagement/errorClass';
 
 export const runInitCommand = async (args: InitArgs): Promise<number> => {
   try {
+    if (!args.shell) throw new ProfileError(`--shell required`, ExitCode.INVALID_INPUT);
     const { type, file } = getShellConfig(args.shell);
 
     const scriptStart = '# gpx init >>>';
