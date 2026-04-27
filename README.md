@@ -60,5 +60,3 @@ bun run lint
 - `profiles.json`
 - `active.json`
 - `config.json`
-
-Backups are stored in `~/.gpx/backups` before write operations.
