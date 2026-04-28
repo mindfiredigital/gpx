@@ -1,4 +1,4 @@
-type ShellType = 'bash' | 'zsh' | 'fish';
+type ShellType = 'bash' | 'zsh';
 
 interface GetShellConfig {
   type: string;
