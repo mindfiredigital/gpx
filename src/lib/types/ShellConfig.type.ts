@@ -5,4 +5,9 @@ interface GetShellConfig {
   file: string;
 }
 
-export type { ShellType, GetShellConfig };
+interface ShellScript {
+  initScript: string;
+  completionScript: string;
+}
+
+export type { ShellType, GetShellConfig, ShellScript };

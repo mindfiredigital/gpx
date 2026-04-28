@@ -4,9 +4,9 @@ import path from 'node:path';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printSuccess, printHuman, printJson } from '../utils/output';
 import { getShellConfig } from '../utils/shell/getShell';
-import { buildBashInitScript, buildBashCompletionScript } from '../utils/shell/bashShellScripts';
 import type { InitArgs } from '../lib/types/InitCommand.type';
 import { ProfileError } from '../core/profileManagement/errorClass';
+import { getShellScripts } from '../utils/shell/getShellScripts';
 
 export const runInitCommand = async (args: InitArgs): Promise<number> => {
   try {
@@ -15,7 +15,8 @@ export const runInitCommand = async (args: InitArgs): Promise<number> => {
 
     const scriptStart = '# gpx init >>>';
     const scriptEnd = '# <<< gpx init';
-    const scriptBody = `${buildBashInitScript()}\n${buildBashCompletionScript()}`;
+    const { initScript, completionScript } = getShellScripts(type);
+    const scriptBody = `${initScript}\n${completionScript}`;
     const scriptContent = `\n${scriptStart}\n${scriptBody}\n${scriptEnd}`;
 
     if (!fs.existsSync(file)) fs.writeFileSync(file, '', { encoding: 'utf-8' });
