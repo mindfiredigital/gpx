@@ -11,6 +11,7 @@ import { runShowCommand } from './commands/show';
 import { runInitCommand } from './commands/init';
 import { setOutputFlags } from './utils/output';
 import type { GlobalCliOptions } from './lib/types/GpxConfig.type';
+import { runCompletionCommand } from './commands/completion';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -112,9 +113,20 @@ await yargs(hideBin(process.argv))
   .command(
     'init',
     'Initialize shell support and prompt badge',
-    (builder: any) => builder.option('shell', { type: 'string', choices: ['bash', 'zsh', 'fish'] }),
+    (builder: any) => builder.option('shell', { type: 'string', choices: ['bash', 'zsh'] }),
     async (argv: any) => {
       process.exitCode = await runInitCommand({
+        shell: argv.shell,
+        json: argv.json,
+      });
+    }
+  )
+  .command(
+    'completion',
+    '',
+    (builder: any) => builder.option('shell', { type: 'string', choices: ['bash', 'zsh'] }),
+    async (argv: any) => {
+      process.exitCode = await runCompletionCommand({
         shell: argv.shell,
         json: argv.json,
       });

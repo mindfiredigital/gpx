@@ -1,4 +1,4 @@
 export interface InitArgs {
-  shell: 'bash' | 'fish' | 'zsh';
+  shell: 'bash' | 'zsh';
   json?: boolean;
 }
