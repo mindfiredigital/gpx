@@ -11,6 +11,7 @@ Git Profile eXchanger (`gpx`) helps you switch Git identities quickly from the C
 - Show active profile info: `gpx current`
 - Remove profile: `gpx remove <name>` / `gpx rm <name>`
 - Inject current profile & enable command + profile completion feature: `gpx init --shell <shell_name>`
+- Get command/profile completion function: `gpx completion --shell <shell_name>`
 
 ## Local Setup
 
@@ -34,7 +35,10 @@ gpx current
 gpx show work
 gpx remove personal
 gpx rm personal
-gpx init --shell <shell_name>  --> Bash / Zsh
+gpx init --shell bash
+gpx init --shell zsh
+gpx completion --shell bash
+gpx completion --shell zsh
 ```
 
 ## Global Flags
