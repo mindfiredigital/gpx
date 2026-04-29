@@ -1,18 +1,41 @@
 const buildZshInitScript = (): string => {
   return `setopt PROMPT_SUBST
-    _get_current_profile_name() {
-    local line
-    line="$(gpx current 2>/dev/null | head -n 1)"
-    if [[ "$line" == *"Active profile: "* ]]; then
-        ACTIVE_PROFILE=" [\${line#Active profile: }]"
+
+__gpx_get_active_profile() {
+    gpx current --json 2>/dev/null | awk '
+        /"active"[[:space:]]*:/ { in_active = 1; next }
+        in_active && /"profile"[[:space:]]*:/ {
+            line = $0
+            sub(/.*"profile"[[:space:]]*:[[:space:]]*"/, "", line)
+            sub(/".*/, "", line)
+            print line
+            exit
+        }
+    '
+}
+
+__gpx_update_prompt_profile() {
+    local profile
+    profile="$(__gpx_get_active_profile)"
+    if [[ -n "$profile" && "$profile" != "null" ]]; then
+        ACTIVE_PROFILE="[$profile] "
     else
         ACTIVE_PROFILE=""
     fi
 }
-    autoload -Uz add-zsh-hook
-    add-zsh-hook precmd _get_current_profile_name
-    PROMPT='%n@%m %1~%F{red}\${ACTIVE_PROFILE}%f %# '
-    `;
+
+__gpx_on_directory_change() {
+    __gpx_update_prompt_profile
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd __gpx_on_directory_change
+add-zsh-hook precmd __gpx_update_prompt_profile
+
+if [[ -z "\${__GPX_ORIGINAL_PROMPT+x}" ]]; then
+    __GPX_ORIGINAL_PROMPT="$PROMPT"
+    PROMPT='\${ACTIVE_PROFILE}'"$__GPX_ORIGINAL_PROMPT"
+fi`;
 };
 
 const buildZshCompletionScript = (): string => {

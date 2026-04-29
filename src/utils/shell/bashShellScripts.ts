@@ -1,21 +1,54 @@
 const buildBashInitScript = (): string => {
-  return `_get_current_profile_name() {
-    local line
-    line="$(gpx current 2>/dev/null | head -n 1)"
-    if [[ "$line" == *"Active profile: "* ]]; then
-        ACTIVE_PROFILE=" [\${line#Active profile: }]"
+  return `__gpx_get_active_profile_name() {
+    gpx current --json 2>/dev/null | awk '
+        /"active"[[:space:]]*:/ { in_active = 1; next }
+        in_active && /"profile"[[:space:]]*:/ {
+            line = $0
+            sub(/.*"profile"[[:space:]]*:[[:space:]]*"/, "", line)
+            sub(/".*/, "", line)
+            print line
+            exit
+        }
+    '
+}
+
+__gpx_update_prompt_profile() {
+    local profile
+    profile="$(__gpx_get_active_profile_name)"
+    if [[ -n "$profile" && "$profile" != "null" ]]; then
+        ACTIVE_PROFILE="[$profile] "
     else
         ACTIVE_PROFILE=""
     fi
 }
 
-if [[ ! "$PROMPT_COMMAND" == *"_get_current_profile_name"* ]]; then
-    PROMPT_COMMAND="\${PROMPT_COMMAND}_get_current_profile_name;"
+__gpx_on_directory_change() {
+    __gpx_update_prompt_profile
+}
+
+__gpx_check_directory_change() {
+    if [[ "$PWD" != "$__GPX_LAST_PWD" ]]; then
+        __GPX_LAST_PWD="$PWD"
+        __gpx_on_directory_change
+    else
+        __gpx_update_prompt_profile
+    fi
+}
+
+if [[ "$PROMPT_COMMAND" != *__gpx_check_directory_change* ]]; then
+    if [[ -n "$PROMPT_COMMAND" ]]; then
+        PROMPT_COMMAND="__gpx_check_directory_change; $PROMPT_COMMAND"
+    else
+        PROMPT_COMMAND="__gpx_check_directory_change"
+    fi
 fi
 
-PS1='\\]\\[\\033]0;$TITLEPREFIX:$PWD\\007\\]\\\n\\[\\033[32m\\]\\u@\\h \\[\\033[35m\\]$MSYSTEM \\[\\033[33m\\]\\w\\[\\033[36m\\]\`__git_ps1\`\\[\\033[31m\\]$ACTIVE_PROFILE\\[\\033[0m\\]\\n$ '
+if [[ -z "\${__GPX_ORIGINAL_PS1+x}" ]]; then
+    __GPX_ORIGINAL_PS1="$PS1"
+    PS1='\${ACTIVE_PROFILE}'"$__GPX_ORIGINAL_PS1"
+fi
 
-bind 'TAB:menu-complete'`;
+__GPX_LAST_PWD="$PWD"`;
 };
 
 const buildBashCompletionScript = (): string => {
@@ -23,7 +56,8 @@ const buildBashCompletionScript = (): string => {
   const profileCommands = 'show remove rm use';
   const flags = '--json --no-interactive --no-color --quiet --help';
 
-  return `bash_completion() {
+  return `bind 'TAB:menu-complete'
+  bash_completion() {
     local curr prev commands profileCommands flags profiles
 
     curr="\${COMP_WORDS[COMP_CWORD]}"
