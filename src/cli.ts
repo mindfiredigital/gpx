@@ -113,7 +113,8 @@ await yargs(hideBin(process.argv))
   .command(
     'init',
     'Initialize shell support and prompt badge',
-    (builder: any) => builder.option('shell', { type: 'string', choices: ['bash', 'zsh'] }),
+    (builder: any) =>
+      builder.option('shell', { type: 'string', choices: ['bash', 'zsh', 'powershell'] }),
     async (argv: any) => {
       process.exitCode = await runInitCommand({
         shell: argv.shell,
@@ -124,7 +125,8 @@ await yargs(hideBin(process.argv))
   .command(
     'completion',
     '',
-    (builder: any) => builder.option('shell', { type: 'string', choices: ['bash', 'zsh'] }),
+    (builder: any) =>
+      builder.option('shell', { type: 'string', choices: ['bash', 'zsh', 'powershell'] }),
     async (argv: any) => {
       process.exitCode = await runCompletionCommand({
         shell: argv.shell,

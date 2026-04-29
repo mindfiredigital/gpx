@@ -19,6 +19,8 @@ export const runInitCommand = async (args: InitArgs): Promise<number> => {
     const scriptBody = `${initScript}\n${completionScript}`;
     const scriptContent = `\n${scriptStart}\n${scriptBody}\n${scriptEnd}`;
 
+    const shellConfigDir = path.dirname(file);
+    if (!fs.existsSync(shellConfigDir)) fs.mkdirSync(shellConfigDir, { recursive: true });
     if (!fs.existsSync(file)) fs.writeFileSync(file, '', { encoding: 'utf-8' });
 
     if (type === 'bash') {
