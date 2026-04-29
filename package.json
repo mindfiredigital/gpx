@@ -1,6 +1,6 @@
 {
   "name": "gpx",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
@@ -26,9 +26,13 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "changeset": "changeset",
+    "publish": "changeset publish",
+    "version": "changeset version"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
