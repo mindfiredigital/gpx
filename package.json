@@ -1,6 +1,6 @@
 {
   "name": "gpx",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
