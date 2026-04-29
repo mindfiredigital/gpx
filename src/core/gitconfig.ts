@@ -5,6 +5,7 @@ import type { GitScope, GitIdentity } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
 import { ProfileError } from './profileManagement/errorClass';
 import { backupFile } from './profileManagement/storeBackup';
+import { listProfiles } from './profileManagement/profiles';
 
 const run = (cmd: string): string => {
   return execSync(cmd, { encoding: 'utf-8' }).trim();
@@ -36,6 +37,20 @@ const getGitVersion = (): string => {
   return run('git --version');
 };
 
+const hasIdentity = (identity: GitIdentity): boolean => {
+  return Boolean(identity.name || identity.email || identity.signingKey);
+};
+
+const findProfileNameByIdentity = (identiy: GitIdentity | null): string | null => {
+  if (!identiy) return null;
+
+  const profile = listProfiles().find(
+    (candidate) => candidate.email === identiy.email && candidate.display_name === identiy.name
+  );
+
+  return profile?.name ?? null;
+};
+
 const getCurrentGitIdentity = (scope: GitScope = 'global'): GitIdentity => {
   ensureGitInstalled();
 
@@ -49,6 +64,14 @@ const getCurrentGitIdentity = (scope: GitScope = 'global'): GitIdentity => {
     email: safeGet(`git config ${flag} --get user.email`),
     signingKey: safeGet(`git config ${flag} --get user.signingkey`),
   };
+};
+
+const getGpxLocalProfileName = (): string | null => {
+  ensureGitInstalled();
+
+  if (!isInsideGitRepo()) return null;
+
+  return safeGet(`git config --local --get gpx.profile`);
 };
 
 const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): void => {
@@ -66,6 +89,8 @@ const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): 
 
   run(`git config ${flag} user.name "${profile.display_name}"`);
   run(`git config ${flag} user.email "${profile.email}"`);
+
+  if (scope === 'local') run(`git config ${flag} gpx.profile "${profile.name}"`);
 
   if (profile.gpg_key) {
     run(`git config ${flag} user.signingkey "${profile.gpg_key}"`);
@@ -102,7 +127,10 @@ const getGitRepoRoot = (): string | null => {
 export {
   ensureGitInstalled,
   getGitVersion,
+  hasIdentity,
+  findProfileNameByIdentity,
   getCurrentGitIdentity,
+  getGpxLocalProfileName,
   applyProfileToGitConfig,
   isInsideGitRepo,
   getGitRepoRoot,
