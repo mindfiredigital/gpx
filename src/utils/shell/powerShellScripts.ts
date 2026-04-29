@@ -151,6 +151,99 @@ const buildPowerShellCompletionScript = (): string => {
     }
 }
     Register-ArgumentCompleter -Native -CommandName gpx -ScriptBlock $scriptblock`;
+  return `$scriptblock = {
+    param($wordToComplete, $commandAst, $cursorPosition)
+
+    $commands = @(
+        'add',
+        'ls',
+        'show',
+        'remove',
+        'rm',
+        'use',
+        'current',
+        'init',
+        'completion'
+    )
+    $profileCommands = @('show', 'remove', 'rm', 'use')
+    $shellCommands = @('init', 'completion')
+    $shells = @('bash', 'zsh', 'powershell')
+    $globalFlags = @('--json', '--no-interactive', '--no-color', '--quiet', '--help')
+    $commandFlags = @{
+        add = @('--display-name', '--email', '--ssh-key', '--generate-ssh', '--gpg-key', '--signing')
+        use = @('--local')
+        remove = @('--force')
+        rm = @('--force')
+        init = @('--shell')
+        completion = @('--shell')
+    }
+
+    function New-GpxCompletionResult {
+        param(
+            [string]$Value,
+            [string]$ToolTip = $Value
+        )
+
+        [System.Management.Automation.CompletionResult]::new(
+            $Value,
+            $Value,
+            [System.Management.Automation.CompletionResultType]::ParameterValue,
+            $ToolTip
+        )
+    }
+
+    function Get-GpxProfileNames {
+        try {
+            $json = gpx ls --json 2>$null | Out-String
+            if ([string]::IsNullOrWhiteSpace($json)) {
+                return @()
+            }
+
+            $result = $json | ConvertFrom-Json
+            return @($result.data.profiles | ForEach-Object { $_.name })
+        } catch {
+            return @()
+        }
+    }
+
+    $words = @($commandAst.CommandElements | ForEach-Object { $_.Extent.Text })
+    $command = if ($words.Count -gt 1) { $words[1] } else { '' }
+    $previousWord = if ($words.Count -gt 1) { $words[$words.Count - 2] } else { '' }
+
+    if ($words.Count -eq 2 -and $wordToComplete -notlike '-*') {
+        $commands |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            ForEach-Object { New-GpxCompletionResult $_ }
+        return
+    }
+
+    if ($previousWord -eq '--shell' -and $command -in $shellCommands) {
+        $shells |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            ForEach-Object { New-GpxCompletionResult $_ }
+        return
+    }
+
+    if ($wordToComplete -like '--*') {
+        $flags = @($globalFlags)
+        if ($commandFlags.ContainsKey($command)) {
+            $flags += $commandFlags[$command]
+        }
+
+        $flags |
+            Select-Object -Unique |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            ForEach-Object { New-GpxCompletionResult $_ }
+        return
+    }
+
+    if ($command -in $profileCommands) {
+        Get-GpxProfileNames |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            ForEach-Object { New-GpxCompletionResult $_ }
+    }
+}
+    Register-ArgumentCompleter -Native -CommandName gpx -ScriptBlock $scriptblock`;
 };
 
 export { buildPowerShellInitScript, buildPowerShellCompletionScript };
