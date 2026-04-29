@@ -1,4 +1,4 @@
 export interface InitArgs {
-  shell: 'bash' | 'zsh';
+  shell: 'bash' | 'zsh' | 'powershell';
   json?: boolean;
 }
