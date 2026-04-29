@@ -1,4 +1,4 @@
-type ShellType = 'bash' | 'zsh';
+type ShellType = 'bash' | 'zsh' | 'powershell';
 
 interface GetShellConfig {
   type: string;
