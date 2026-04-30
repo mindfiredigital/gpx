@@ -23,6 +23,14 @@ const PROFILES_PATH: string = path.join(GPX_DIR, 'profiles.json');
 const ACTIVE_PATH: string = path.join(GPX_DIR, 'active.json');
 const CONFIG_PATH: string = path.join(GPX_DIR, 'config.json');
 const LOCK_PATH: string = path.join(GPX_DIR, '.lock');
+const CONFIG_DIR: string = path.join(os.homedir(), '.config', 'gpx');
+const CONFIG_FILE: string = path.join(CONFIG_DIR, 'config.json');
+
+// Device Flow - add + authenticate profile
+const CLIENT_ID = 'Ov23li0ZL83hkSL1opAY';
+const DEVICE_CODE_URL = 'https://github.com/login/device/code';
+const TOKEN_URL = 'https://github.com/login/oauth/access_token';
+const API_BASE = 'https://api.github.com';
 
 export {
   ExitCode,
@@ -35,4 +43,10 @@ export {
   ACTIVE_PATH,
   CONFIG_PATH,
   LOCK_PATH,
+  CLIENT_ID,
+  DEVICE_CODE_URL,
+  TOKEN_URL,
+  API_BASE,
+  CONFIG_DIR,
+  CONFIG_FILE,
 };

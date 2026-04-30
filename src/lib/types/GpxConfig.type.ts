@@ -19,4 +19,8 @@ type GitIdentity = {
   signingKey: string | null;
 };
 
-export type { GpxConfig, GlobalCliOptions, GitScope, GitIdentity };
+interface GithubPersonalAccessToken {
+  github_tokens?: Record<string, string>;
+}
+
+export type { GpxConfig, GlobalCliOptions, GitScope, GitIdentity, GithubPersonalAccessToken };
