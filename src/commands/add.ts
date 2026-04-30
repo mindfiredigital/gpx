@@ -6,6 +6,8 @@ import { ProfileError } from '../core/profileManagement/errorClass';
 import type { AddArgs } from '../lib/types/AddCommand.type';
 import { generateSshKeyForProfile } from '../core/sshConfigManagement/generateSshKey';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
+import { githubOAuthFlow } from '../core/githubManagement/githubOAuthFlow';
+import { uploadSshKeyToGithub } from '../core/githubManagement/uploadSshToGithub';
 
 export const runAddCommand = async (args: AddArgs): Promise<number> => {
   try {
@@ -20,26 +22,6 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
     let displayName = args.displayName;
     let email = args.email;
 
-    if (!displayName || !email) {
-      if (args.noInteractive) {
-        throw new ProfileError(
-          'Both --display-name and --email are required in --no-interactive mode',
-          ExitCode.INVALID_INPUT
-        );
-      }
-
-      if (!displayName) {
-        displayName = await ask('Display name: ');
-      }
-      if (!email) {
-        email = await ask('Email: ');
-      }
-    }
-
-    if (!displayName || !email) {
-      throw new ProfileError('Both display name and email are required', ExitCode.INVALID_INPUT);
-    }
-
     if (args.generateSsh && args.sshKey) {
       throw new ProfileError(
         'use either --generate-ssh or --ssh-key, not both',
@@ -52,9 +34,31 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       | { privateKeyPath: string; publicKeyPath: string; publicKey: string }
       | undefined;
 
+    let token: string | undefined;
     if (args.generateSsh) {
+      const oauthData = await githubOAuthFlow(args.name);
+      displayName = oauthData.name;
+      email = oauthData.email;
+      token = oauthData.token;
+
       generateSsh = generateSshKeyForProfile(args.name, email);
       sshKeyPath = generateSsh.privateKeyPath;
+      await uploadSshKeyToGithub(token, args.name, generateSsh.publicKey);
+    }
+
+    if (!displayName || !email) {
+      if (args.noInteractive) {
+        throw new ProfileError(
+          'Both --display-name and --email are required in --no-interactive mode',
+          ExitCode.INVALID_INPUT
+        );
+      }
+      if (!displayName) displayName = await ask(`Display Name:`);
+      if (!email) email = await ask(`Email:`);
+    }
+
+    if (!displayName || !email) {
+      throw new ProfileError('Both display name and email are required', ExitCode.INVALID_INPUT);
     }
 
     const profileToAdd = {
@@ -85,8 +89,7 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       printJson({ success: true, data: payload });
     } else {
       printSuccess(`Profile added: ${args.name}`);
-      if (generateSsh)
-        printHuman(`Public key (add this to GitHub/GitLab): \n${generateSsh.publicKey}`);
+      if (generateSsh) printHuman(`Public key added to GitHub`);
     }
 
     return ExitCode.SUCCESS;
