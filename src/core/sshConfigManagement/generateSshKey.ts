@@ -17,7 +17,13 @@ export const generateSshKeyForProfile = (profileName: string, email: string): Ge
   try {
     execFileSync('ssh-keygen', ['-t', 'ed25519', '-f', privateKeyPath, '-C', email, '-N', '']);
   } catch {
-    throw new ProfileError(`Failed to generate SSK Key`, ExitCode.INVALID_INPUT);
+    throw new ProfileError(`Failed to generate SSH Key`, ExitCode.INVALID_INPUT);
+  }
+
+  try {
+    execFileSync('ssh-add', [privateKeyPath]);
+  } catch {
+    throw new ProfileError(`Error adding key to ssh-agent`, ExitCode.PERMISSION_ERROR);
   }
 
   let publicKey: string;
