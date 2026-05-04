@@ -25,6 +25,11 @@ __gpx_update_prompt_profile() {
 }
 
 __gpx_on_directory_change() {
+    local auto_detect
+    auto_detect=$(gpx config get auto-detect --quiet 2>/dev/null)
+    if [[ "$auto_detect" == *"true"* ]]; then
+        gpx autodetect --quiet 2>/dev/null
+    fi
     __gpx_update_prompt_profile
 }
 
