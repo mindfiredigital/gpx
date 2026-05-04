@@ -1,11 +1,12 @@
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import type { Profile } from '../lib/types/Profile.type';
-import type { GitScope, GitIdentity } from '../lib/types/GpxConfig.type';
+import type { GitScope, GitIdentity, UpdateRemoteProfile } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
 import { ProfileError } from './profileManagement/errorClass';
 import { backupFile } from './profileManagement/storeBackup';
 import { listProfiles } from './profileManagement/profiles';
+import { GPX_HOST_ALIAS_REGEX } from '../lib/validations';
 
 const run = (cmd: string): string => {
   return execSync(cmd, { encoding: 'utf-8' }).trim();
@@ -124,7 +125,66 @@ const getGitRepoRoot = (): string | null => {
   }
 };
 
+const getRemoteUrl = (remoteName: string = 'origin'): string | null => {
+  if (!isInsideGitRepo()) return null;
+  return safeGet(`git remote get-url ${remoteName}`);
+};
+
+const getGpxProfileFromRemote = (remoteUrl: string): string | null => {
+  const match = remoteUrl.match(GPX_HOST_ALIAS_REGEX);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+};
+
+const isHttpsRemote = (remoteUrl: string): boolean => {
+  return remoteUrl.startsWith('https://');
+};
+
+const updateRemoteForProfile = (
+  newProfileName: string,
+  scope?: 'local' | 'global'
+): UpdateRemoteProfile => {
+  const result: UpdateRemoteProfile = { updated: [], httpsWarnings: [] };
+
+  if (!isInsideGitRepo()) return result;
+
+  const remotesRaw = safeGet('git remote');
+  if (!remotesRaw) return result;
+
+  const remotes = remotesRaw.split('\n').filter(Boolean);
+
+  for (const remote of remotes) {
+    const url = getRemoteUrl(remote);
+    if (!url) continue;
+
+    if (isHttpsRemote(url)) {
+      result.httpsWarnings.push(`Remote "${remote}" uses HTTPS (${url}). Not Supported.`);
+      continue;
+    }
+
+    const currentProfile = getGpxProfileFromRemote(url);
+    if (!currentProfile) continue;
+
+    if (currentProfile === newProfileName) continue;
+
+    let newUrl: string;
+    if (scope === 'local') {
+      newUrl = url.replace(`github.com-${currentProfile}`, `github.com-${newProfileName}`);
+    } else {
+      newUrl = url;
+    }
+
+    run(`git remote set-url ${remote} "${newUrl}"`);
+    result.updated.push({ remote, oldUrl: url, newUrl });
+  }
+
+  return result;
+};
+
 export {
+  safeGet,
   ensureGitInstalled,
   getGitVersion,
   hasIdentity,
@@ -134,4 +194,8 @@ export {
   applyProfileToGitConfig,
   isInsideGitRepo,
   getGitRepoRoot,
+  getRemoteUrl,
+  getGpxProfileFromRemote,
+  isHttpsRemote,
+  updateRemoteForProfile,
 };

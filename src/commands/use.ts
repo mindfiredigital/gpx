@@ -1,11 +1,16 @@
 import { getProfile } from '../core/profileManagement/profiles';
 import { saveActive } from '../core/profileManagement/activeStore';
-import { applyProfileToGitConfig } from '../core/gitconfig';
+import {
+  applyProfileToGitConfig,
+  isInsideGitRepo,
+  updateRemoteForProfile,
+} from '../core/gitconfig';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess, printWarn } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 import { validateSshKeyForProfile } from '../core/sshConfigManagement/sshKeyExistencePermissionCheck';
+import type { RemoteUpdate } from '../lib/types/RemoteUpdate.type';
 
 export const runUseCommand = async (
   profileName: string,
@@ -37,6 +42,17 @@ export const runUseCommand = async (
       }
     }
 
+    const remoteUpdates: RemoteUpdate[] = [];
+    if (isInsideGitRepo()) {
+      const result = updateRemoteForProfile(profile.name, scope);
+
+      remoteUpdates.push(...result.updated);
+
+      for (const httpsWarn of result.httpsWarnings) {
+        warnings.push(httpsWarn);
+      }
+    }
+
     if (!local) {
       await saveActive({
         global: profile.name,
@@ -51,6 +67,7 @@ export const runUseCommand = async (
         email: profile.email,
         scope,
       },
+      remotes_updated: remoteUpdates,
       warnings,
     };
 
