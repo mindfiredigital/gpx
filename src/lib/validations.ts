@@ -6,9 +6,13 @@ const PROFILE_NAME_MAX_LENGTH: number = 35;
 const SSH_CONFIG_NAME_REGEX: RegExp = /[.?+*$(){}|[\]\\^]/g;
 const SSH_CONFIG_NAME_REGEX_REPLACEMENT: string = '\\$&';
 
+// ssh remote url
+const GPX_HOST_ALIAS_REGEX = /^git@github\.com-([^:]+):/;
+
 export {
   PROFILE_NAME_REGEX,
   PROFILE_NAME_MAX_LENGTH,
   SSH_CONFIG_NAME_REGEX,
   SSH_CONFIG_NAME_REGEX_REPLACEMENT,
+  GPX_HOST_ALIAS_REGEX,
 };
