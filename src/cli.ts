@@ -16,6 +16,7 @@ import { runRunCommand } from './commands/run';
 import { runAutoDetectCommand } from './commands/autodetect';
 import { runConfigGetCommand, runConfigSetCommand } from './commands/config';
 import { runDoctorCommand } from './commands/doctor';
+import { runExportCommand } from './commands/export';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -182,6 +183,14 @@ await yargs(hideBin(process.argv))
     (builder: any) => builder.positional('name', { type: 'string' }),
     async (argv: any) => {
       process.exitCode = await runDoctorCommand(argv.name, argv.json);
+    }
+  )
+  .command(
+    'export',
+    'Export Profiles in JSON format',
+    (builder: any) => builder.option('include-public-keys', { type: 'boolean', default: false }),
+    async (argv: any) => {
+      process.exitCode = await runExportCommand(argv.includePublicKeys, argv.json);
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')
