@@ -1,26 +1,51 @@
 import { loadActive } from '../core/profileManagement/activeStore';
-import { getCurrentGitIdentity, isInsideGitRepo } from '../core/gitconfig';
+import {
+  getCurrentGitIdentity,
+  isInsideGitRepo,
+  getGpxLocalProfileName,
+  hasIdentity,
+  findProfileNameByIdentity,
+} from '../core/gitconfig';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printHuman, printJson } from '../utils/output';
+import type { GitIdentity } from '../lib/types/GpxConfig.type';
+import type { ActiveProfileScope } from '../lib/types/ActiveStore.type';
 
 export const runCurrentCommand = async (json: boolean): Promise<number> => {
   try {
     const active = loadActive();
     const globalIdentity = getCurrentGitIdentity('global');
     const inRepo = isInsideGitRepo();
+    const globalProfileName = active.global ?? findProfileNameByIdentity(globalIdentity);
 
-    let localIdentity: ReturnType<typeof getCurrentGitIdentity> | null = null;
+    let localIdentity: GitIdentity | null = null;
+    let localProfileName: string | null = null;
     if (inRepo) {
       const identity = getCurrentGitIdentity('local');
-      if (identity.name || identity.email || identity.signingKey) {
+      if (hasIdentity(identity)) {
         localIdentity = identity;
+        localProfileName = getGpxLocalProfileName() ?? findProfileNameByIdentity(localIdentity);
       }
     }
 
+    const activeScope: ActiveProfileScope = localProfileName ? 'local' : 'global';
+    const activeProfile = activeScope === 'local' ? localProfileName : globalProfileName;
+
     const payload = {
-      active: active.global,
-      global: globalIdentity,
-      local: localIdentity,
+      active: {
+        profile: activeProfile,
+        scope: activeScope,
+      },
+      global: {
+        profile: globalProfileName,
+        ...globalIdentity,
+      },
+      local: localIdentity
+        ? {
+            profile: localProfileName,
+            ...localIdentity,
+          }
+        : null,
     };
 
     if (json) {
@@ -28,11 +53,13 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
       return ExitCode.SUCCESS;
     }
 
-    printHuman(`Active profile: ${active.global ?? 'none'}`);
+    printHuman(`Active profile: ${activeProfile ?? 'none'}`);
+    printHuman(`Scope: ${activeScope}`);
     printHuman(`Global name: ${globalIdentity.name ?? 'not set'}`);
     printHuman(`Global email: ${globalIdentity.email ?? 'not set'}`);
 
     if (localIdentity) {
+      printHuman(`Local profile: ${localProfileName ?? 'not set'}`);
       printHuman(`Local name: ${localIdentity.name ?? 'not set'}`);
       printHuman(`Local email: ${localIdentity.email ?? 'not set'}`);
     }
