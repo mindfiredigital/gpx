@@ -103,7 +103,11 @@ describe('use command', () => {
   });
 });
 
+<<<<<<< HEAD
 describe('use command - remote URL rewriting', () => {
+=======
+describe('use command — remote URL rewriting', () => {
+>>>>>>> 7526b06 (feat: power features integration (#33))
   it('should warn about HTTPS remotes', async () => {
     mocks.isInsideGitRepo.mockReturnValue(true);
     mocks.updateRemoteForProfile.mockReturnValue({
