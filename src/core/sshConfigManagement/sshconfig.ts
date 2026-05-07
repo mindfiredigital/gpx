@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { SSH_DIR, SSH_CONFIG_PATH, ExitCode } from '../../lib/constants';
 import { readSshConfig, writeSshConfig, buildSshBlock } from './handleConfigReadWrite';
 import type { Profile } from '../../lib/types/Profile.type';
@@ -36,7 +37,10 @@ const upsertSshConfigForProfile = async (profile: Profile): Promise<void> => {
   await writeSshConfig(`${updated.trimEnd()}\n`);
 };
 
-const removeSshConfigForProfile = async (profileName: string): Promise<void> => {
+const removeSshConfigForProfile = async (
+  profileName: string,
+  privateKeyPath: string | undefined
+): Promise<void> => {
   const config = readSshConfig();
   const [start, end] = [`# BEGIN gpx:${profileName}`, `# END gpx:${profileName}`];
 
@@ -51,6 +55,13 @@ const removeSshConfigForProfile = async (profileName: string): Promise<void> => 
     .trimEnd();
   const newContent = updated.length > 0 ? `${updated}\n` : updated;
   await writeSshConfig(newContent);
+  if (privateKeyPath) {
+    try {
+      execFileSync('ssh-add', ['-d', privateKeyPath]);
+    } catch {
+      throw new ProfileError(`Error adding key to ssh-agent`, ExitCode.PERMISSION_ERROR);
+    }
+  }
 };
 
 export {
