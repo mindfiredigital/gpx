@@ -18,6 +18,7 @@ import { runConfigGetCommand, runConfigSetCommand } from './commands/config';
 import { runDoctorCommand } from './commands/doctor';
 import { runExportCommand } from './commands/export';
 import { runImportCommand } from './commands/import';
+import { runEditCommand } from './commands/edit';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -206,6 +207,23 @@ await yargs(hideBin(process.argv))
         .option('merge', { type: 'boolean', default: false }),
     async (argv: any) => {
       process.exitCode = await runImportCommand(argv.filepath, argv.merge, argv.json);
+    }
+  )
+  .command(
+    'edit <name>',
+    'Edit existing profile info.',
+    (builder: any) =>
+      builder
+        .positional('name', { type: 'string', demandOption: true })
+        .option('ssh-key', { type: 'string' })
+        .option('gpg-key', { type: 'string' })
+        .option('signing', { type: 'boolean' }),
+    async (argv: any) => {
+      process.exitCode = await runEditCommand(
+        argv.name,
+        { sshKey: argv.sshKey, gpgKey: argv.gpgKey, signing: argv.signing },
+        argv.json
+      );
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')
