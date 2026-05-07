@@ -103,7 +103,7 @@ describe('use command', () => {
   });
 });
 
-describe('use command — remote URL rewriting', () => {
+describe('use command - remote URL rewriting', () => {
   it('should warn about HTTPS remotes', async () => {
     mocks.isInsideGitRepo.mockReturnValue(true);
     mocks.updateRemoteForProfile.mockReturnValue({

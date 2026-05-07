@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import { listProfiles } from '../core/profileManagement/profiles';
 import { ExitCode } from '../lib/constants';
-import { handleCommandError, printHuman, printJson } from '../utils/output';
+import { handleCommandError, printHuman, printJson, printSuccess } from '../utils/output';
 
 export const runExportCommand = async (
   includePublicKeys: boolean,
+  exportPath: string,
   json: boolean
 ): Promise<number> => {
   try {
@@ -53,11 +54,22 @@ export const runExportCommand = async (
       profiles: exportProfiles,
       exported_at: new Date().toISOString(),
     };
+    const exportJsonString = JSON.stringify(formatExport, null, 2);
 
-    if (json) {
-      printJson({ success: true, data: formatExport });
+    if (exportPath) {
+      fs.writeFileSync(exportPath, exportJsonString, { encoding: 'utf-8' });
+      if (json) {
+        printJson({ success: true, data: { file: exportPath, count: exportProfiles.length } });
+      } else {
+        const profileString = exportProfiles.length === 1 ? 'profile' : 'profiles';
+        printSuccess(`Exported ${exportProfiles.length} ${profileString} to ${exportPath}`);
+      }
     } else {
-      printJson({ profiles: exportProfiles });
+      if (json) {
+        printJson({ success: true, data: formatExport });
+      } else {
+        printJson({ profiles: exportProfiles });
+      }
     }
 
     return ExitCode.SUCCESS;

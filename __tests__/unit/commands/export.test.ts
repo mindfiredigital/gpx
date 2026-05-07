@@ -7,14 +7,16 @@ const { mocks } = vi.hoisted(() => ({
     mocks: {
         listProfiles: vi.fn(),
         readFileSync: vi.fn(),
-        existsSync: vi.fn()
+        existsSync: vi.fn(),
+        writeFileSync: vi.fn(),
     }
 }))
 
 vi.mock('node:fs', () => ({
     default: {
         existsSync: mocks.existsSync,
-        readFileSync: mocks.readFileSync
+        readFileSync: mocks.readFileSync,
+        writeFileSync: mocks.writeFileSync
     }
 }))
 
@@ -56,49 +58,47 @@ beforeEach(() => {
 
 describe('export command', () => {
     it('should export all existing profiles', async () => {
-        const code = await runExportCommand(false, false);
-
+        const code = await runExportCommand(false, 'exportPath', false);
         expect(code).toBe(ExitCode.SUCCESS);
-        const output = JSON.parse(consoleOutput[0] as string);
-        expect(output.profiles).toHaveLength(2);
-        expect(output.profiles[0].name).toBe('work');
-        expect(output.profiles[1].name).toBe('personal');
+
+        expect(consoleOutput[0]).toContain('Exported 2 profiles to exportPath');
     });
 
     it('should export profiles in json if --json used', async () => {
-        const code = await runExportCommand(false, true);
+        const code = await runExportCommand(false, 'exportPath', true);
 
         expect(code).toBe(ExitCode.SUCCESS);
         const output = JSON.parse(consoleOutput[0] as string);
         expect(output.success).toBe(true);
-        expect(output.data.profiles).toHaveLength(2);
-        expect(output.data.profiles[0].name).toBe('work');
-        expect(output.data.profiles[1].name).toBe('personal');
+        expect(output.data.file).toBe('exportPath');
+        expect(output.data.count).toBe(2);
     });
 
     it('should include public keys if --include-public-keys used', async () => {
         mocks.existsSync.mockReturnValue(true);
         mocks.readFileSync.mockReturnValue('this is a public key');
-        const code = await runExportCommand(true, false);
+        const code = await runExportCommand(true, 'exportPath', false);
 
         expect(code).toBe(ExitCode.SUCCESS);
-        const output = JSON.parse(consoleOutput[0] as string);
+        const [, content] = mocks.writeFileSync.mock.calls[0]!;
+        const output = JSON.parse(content);
         expect(output.profiles[0].ssh_public_key).toBe('this is a public key');
     });
 
     it('should include public keys + return json if --include-public-keys & --json used', async () => {
         mocks.existsSync.mockReturnValue(true);
         mocks.readFileSync.mockReturnValue('this is a public key');
-        const code = await runExportCommand(true, true);
+        const code = await runExportCommand(true, 'exportPath', true);
 
         expect(code).toBe(ExitCode.SUCCESS);
-        const output = JSON.parse(consoleOutput[0] as string);
-        expect(output.data.profiles[0].ssh_public_key).toBe('this is a public key');
+        const [, content] = mocks.writeFileSync.mock.calls[0]!;
+        const output = JSON.parse(content);
+        expect(output.profiles[0].ssh_public_key).toBe('this is a public key');
     });
 
     it('should handle no profile export attempt', async () => {
         mocks.listProfiles.mockReturnValue([]);
-        const code = await runExportCommand(false, false);
+        const code = await runExportCommand(false, 'exportPath', false);
 
         expect(code).toBe(ExitCode.SUCCESS);
         const output = consoleOutput[0] as string;
