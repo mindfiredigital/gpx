@@ -6,12 +6,19 @@ import { runRemoveCommand } from '../../../src/commands/remove';
 
 const { mocks } = vi.hoisted(() => ({
     mocks: {
+        getProfile: vi.fn(),
         removeProfile: vi.fn(),
+        removeSshConfigForProfile: vi.fn(),
     }
 }));
 
 vi.mock('../../../src/core/profileManagement/profiles', () => ({
+    getProfile: mocks.getProfile,
     removeProfile: mocks.removeProfile,
+}));
+
+vi.mock('../../../src/core/sshConfigManagement/sshconfig', () => ({
+    removeSshConfigForProfile: mocks.removeSshConfigForProfile,
 }));
 
 let consoleOutput: string[] = [];
@@ -24,6 +31,10 @@ beforeEach(() => {
 
     vi.spyOn(console, 'log').mockImplementation(msg => consoleOutput.push(msg));
     vi.spyOn(console, 'error').mockImplementation(msg => consoleOutput.push(msg));
+
+    mocks.getProfile.mockReturnValue(undefined);
+    mocks.removeProfile.mockResolvedValue(undefined);
+    mocks.removeSshConfigForProfile.mockResolvedValue(undefined);
 });
 
 describe('remove command', () => {

@@ -11,6 +11,7 @@ import { SSH_CONFIG_PATH } from '../../../src/lib/constants';
 const { mocks } = vi.hoisted(() => ({
     mocks: {
         existsSync: vi.fn(),
+        execFileSync: vi.fn(),
         writeFileSync: vi.fn(),
         readSshConfig: vi.fn(),
         writeSshConfig: vi.fn(),
@@ -32,6 +33,9 @@ vi.mock('../../../src/core/sshConfigManagement/handleConfigReadWrite', () => ({
 }));
 vi.mock('../../../src/core/sshConfigManagement/sshKeyExistencePermissionCheck', () => ({
     validateSshKeyForProfile: mocks.validateSshKeyForProfile,
+}));
+vi.mock('node:child_process', () => ({
+    execFileSync: mocks.execFileSync,
 }));
 
 describe('sshconfig logic', () => {
@@ -94,7 +98,7 @@ describe('sshconfig logic', () => {
         it('should return silently if profile block is not found', async () => {
             mocks.readSshConfig.mockReturnValue('HOST other-content');
 
-            await removeSshConfigForProfile('work');
+            await removeSshConfigForProfile('work', 'privateKeyPath');
 
             expect(mocks.writeSshConfig).not.toHaveBeenCalled();
         });
@@ -103,7 +107,7 @@ describe('sshconfig logic', () => {
             const content = 'HOST_A\n\n# BEGIN gpx:work\nCONFIG_BLOCK_FOR_WORK_PROFILE\n# END gpx:work\n\nHOST_B';
             mocks.readSshConfig.mockReturnValue(content);
 
-            await removeSshConfigForProfile('work');
+            await removeSshConfigForProfile('work', 'privateKeyPath');
 
             expect(mocks.writeSshConfig).toHaveBeenCalledWith('HOST_A\n\nHOST_B\n');
         });
@@ -112,7 +116,7 @@ describe('sshconfig logic', () => {
             const content = '# BEGIN gpx:work\nCONFIG_BLOCK_FOR_WORK_PROFILE\n# END gpx:work';
             mocks.readSshConfig.mockReturnValue(content);
 
-            await removeSshConfigForProfile('work');
+            await removeSshConfigForProfile('work', 'privateKeyPath');
 
             expect(mocks.writeSshConfig).toHaveBeenCalledWith('');
         });

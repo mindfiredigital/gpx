@@ -12,6 +12,10 @@ import { runInitCommand } from './commands/init';
 import { setOutputFlags } from './utils/output';
 import type { GlobalCliOptions } from './lib/types/GpxConfig.type';
 import { runCompletionCommand } from './commands/completion';
+import { runRunCommand } from './commands/run';
+import { runAutoDetectCommand } from './commands/autodetect';
+import { runConfigGetCommand, runConfigSetCommand } from './commands/config';
+import { runDoctorCommand } from './commands/doctor';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -132,6 +136,52 @@ await yargs(hideBin(process.argv))
         shell: argv.shell,
         json: argv.json,
       });
+    }
+  )
+  .command(
+    'run <name>',
+    'Run a command with a temporary profile',
+    (builder: any) =>
+      builder.positional('name', { type: 'string', demandOption: true }).strict(false),
+    async (argv: any) => {
+      const runIndex = process.argv.indexOf('run');
+      const cmdArgs: string[] = process.argv.slice(runIndex + 2);
+      process.exitCode = await runRunCommand(argv.name, cmdArgs, argv.json);
+    }
+  )
+  .command(
+    'autodetect',
+    false,
+    () => {},
+    async (argv: any) => {
+      process.exitCode = await runAutoDetectCommand(argv.json);
+    }
+  )
+  .command('config', 'Get or set gpx configuration', (builder: any) =>
+    builder
+      .command(
+        'get auto_detect',
+        'Get a config value',
+        () => {},
+        async (argv: any) => {
+          process.exitCode = await runConfigGetCommand(argv.json);
+        }
+      )
+      .command(
+        'set auto_detect',
+        'Set a config value',
+        (b: any) => b.option('update', { type: 'boolean', choices: [true, false], default: true }),
+        async (argv: any) => {
+          process.exitCode = await runConfigSetCommand(argv.update, argv.json);
+        }
+      )
+  )
+  .command(
+    'doctor [name]',
+    'Diagnose profile and system health',
+    (builder: any) => builder.positional('name', { type: 'string' }),
+    async (argv: any) => {
+      process.exitCode = await runDoctorCommand(argv.name, argv.json);
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')
