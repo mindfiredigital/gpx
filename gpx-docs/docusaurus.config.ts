@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'GPX',
-  tagline: 'Git Profile Switcher, nvm for Git Identities',
+  tagline: 'Git Profile eXchanger - nvm for Git Identities',
   favicon: 'img/logo.png',
 
   url: 'https://your-docusaurus-site.example.com',
@@ -26,7 +26,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // editUrl: 'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         blog: false,
 
