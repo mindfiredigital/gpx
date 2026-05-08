@@ -1,5 +1,11 @@
 # gpx
 
+## 0.5.0
+
+### Minor Changes
+
+- 8d258fa: update mindfiredigital-gpx to gpx-tool
+
 ## 0.4.0
 
 ### Minor Changes
