@@ -29,7 +29,8 @@
   },
   "include": [
     "src",
-    "__tests__"
+    "__tests__",
+    "scripts"
   ],
   "exclude": [
     "dist",
