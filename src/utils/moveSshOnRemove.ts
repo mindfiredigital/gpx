@@ -11,14 +11,15 @@ export const moveSshKeysToRemoved = (sshKeyPath: string): void => {
 
   const privateKeyPath = sshKeyPath;
   const publicKeyPath = `${sshKeyPath}.pub`;
+  const timeStamp = new Date().getTime();
 
   if (fs.existsSync(privateKeyPath)) {
     const movePrivateKey = path.join(removedDir, path.basename(privateKeyPath));
-    fs.renameSync(privateKeyPath, movePrivateKey);
+    fs.renameSync(privateKeyPath, `${movePrivateKey}-${timeStamp}`);
   }
 
   if (fs.existsSync(publicKeyPath)) {
     const movePublicKey = path.join(removedDir, path.basename(publicKeyPath));
-    fs.renameSync(publicKeyPath, movePublicKey);
+    fs.renameSync(publicKeyPath, `${movePublicKey}-${timeStamp}`);
   }
 };
