@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "dist",
     // Environment setup & latest features
     "lib": [
@@ -28,9 +28,7 @@
     "noPropertyAccessFromIndexSignature": false
   },
   "include": [
-    "src",
-    "__tests__",
-    "scripts"
+    "src"
   ],
   "exclude": [
     "dist",
