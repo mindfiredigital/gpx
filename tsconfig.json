@@ -28,9 +28,7 @@
     "noPropertyAccessFromIndexSignature": false
   },
   "include": [
-    "src",
-    "__tests__",
-    "scripts"
+    "src"
   ],
   "exclude": [
     "dist",
