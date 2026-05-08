@@ -1,6 +1,6 @@
 {
   "name": "mindfiredigital-gpx",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",

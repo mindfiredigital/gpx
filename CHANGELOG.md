@@ -1,5 +1,11 @@
 # gpx
 
+## 0.3.2
+
+### Patch Changes
+
+- 60f18de: Gpx - Release for windows
+
 ## 0.3.1
 
 ### Patch Changes
