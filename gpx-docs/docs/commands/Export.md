@@ -2,17 +2,17 @@
 ### Commands
 ### Export to file
 ```
-gpx export > my-profiles.json
+gpx export -o <export_profile_path.json>
 ```
 
 ### Include SSH public key content
 ```
-gpx export --include-public-keys > my-profiles.json
+gpx export --include-public-keys -o <export_profile_path.json>
 ```
 
 ### JSON format
 ```
-gpx export --json
+gpx export --json -o <export_profile_path.json>
 ```
 
 ### **Expected output**
