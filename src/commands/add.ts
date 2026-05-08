@@ -36,7 +36,7 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
 
     let token: string | undefined;
     if (args.generateSsh) {
-      const oauthData = await githubOAuthFlow(args.name);
+      const oauthData = await githubOAuthFlow();
       displayName = oauthData.name;
       email = oauthData.email;
       token = oauthData.token;

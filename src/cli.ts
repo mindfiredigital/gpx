@@ -16,6 +16,9 @@ import { runRunCommand } from './commands/run';
 import { runAutoDetectCommand } from './commands/autodetect';
 import { runConfigGetCommand, runConfigSetCommand } from './commands/config';
 import { runDoctorCommand } from './commands/doctor';
+import { runExportCommand } from './commands/export';
+import { runImportCommand } from './commands/import';
+import { runEditCommand } from './commands/edit';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -40,7 +43,7 @@ await yargs(hideBin(process.argv))
         .option('display-name', { type: 'string' })
         .option('email', { type: 'string' })
         .option('ssh-key', { type: 'string' })
-        .option('generate-ssh', { type: 'boolean', default: false })
+        .option('generate-ssh', { type: 'boolean', default: true })
         .option('gpg-key', { type: 'string' })
         .option('signing', { type: 'boolean', default: false }),
     async (argv: any) => {
@@ -182,6 +185,45 @@ await yargs(hideBin(process.argv))
     (builder: any) => builder.positional('name', { type: 'string' }),
     async (argv: any) => {
       process.exitCode = await runDoctorCommand(argv.name, argv.json);
+    }
+  )
+  .command(
+    'export',
+    'Export Profiles in JSON format',
+    (builder: any) =>
+      builder
+        .option('output', { alias: 'o', type: 'string' })
+        .option('include-public-keys', { type: 'boolean', default: false }),
+    async (argv: any) => {
+      process.exitCode = await runExportCommand(argv.includePublicKeys, argv.output, argv.json);
+    }
+  )
+  .command(
+    'import <filepath>',
+    'Import profiles from a JSON file',
+    (builder: any) =>
+      builder
+        .positional('filepath', { type: 'string', demandOption: true })
+        .option('merge', { type: 'boolean', default: false }),
+    async (argv: any) => {
+      process.exitCode = await runImportCommand(argv.filepath, argv.merge, argv.json);
+    }
+  )
+  .command(
+    'edit <name>',
+    'Edit existing profile info.',
+    (builder: any) =>
+      builder
+        .positional('name', { type: 'string', demandOption: true })
+        .option('ssh-key', { type: 'string' })
+        .option('gpg-key', { type: 'string' })
+        .option('signing', { type: 'boolean' }),
+    async (argv: any) => {
+      process.exitCode = await runEditCommand(
+        argv.name,
+        { sshKey: argv.sshKey, gpgKey: argv.gpgKey, signing: argv.signing },
+        argv.json
+      );
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')
