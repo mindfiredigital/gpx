@@ -1,5 +1,11 @@
 # gpx
 
+## 0.4.0
+
+### Minor Changes
+
+- add + remove patch (default ssh-generate support)
+
 ## 0.3.2
 
 ### Patch Changes
