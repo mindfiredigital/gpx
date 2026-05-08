@@ -43,7 +43,7 @@ await yargs(hideBin(process.argv))
         .option('display-name', { type: 'string' })
         .option('email', { type: 'string' })
         .option('ssh-key', { type: 'string' })
-        .option('generate-ssh', { type: 'boolean', default: false })
+        .option('generate-ssh', { type: 'boolean', default: true })
         .option('gpg-key', { type: 'string' })
         .option('signing', { type: 'boolean', default: false }),
     async (argv: any) => {
