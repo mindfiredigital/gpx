@@ -1,10 +1,9 @@
 {
-  "name": "gpx",
+  "name": "mindfiredigital-gpx",
   "version": "0.3.0",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "keywords": [
     "git",
     "profile",
@@ -15,9 +14,18 @@
   ],
   "author": "mindfire-test",
   "license": "MIT",
-  "bin": {
-    "gpx": "./src/cli.ts"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mindfiredigital/gpx"
   },
+  "bin": {
+    "gpx": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
@@ -28,7 +36,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "husky",
     "changeset": "changeset",
-    "publish": "changeset publish",
+    "release": "bun run build && changeset publish",
     "version": "changeset version"
   },
   "devDependencies": {
