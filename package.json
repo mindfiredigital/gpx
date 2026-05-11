@@ -1,10 +1,9 @@
 {
-  "name": "gpx",
-  "version": "0.3.0",
+  "name": "gpx-tool",
+  "version": "0.5.0",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "keywords": [
     "git",
     "profile",
@@ -15,9 +14,21 @@
   ],
   "author": "mindfire-test",
   "license": "MIT",
-  "bin": {
-    "gpx": "./src/cli.ts"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mindfiredigital/gpx"
   },
+  "bin": {
+    "gpx": "./dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
@@ -28,7 +39,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "husky",
     "changeset": "changeset",
-    "publish": "changeset publish",
+    "release": "bun run build && changeset publish",
     "version": "changeset version"
   },
   "devDependencies": {
@@ -46,14 +57,14 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "tsx": "^4.21.0",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.4",
+    "commitlint": "^20.5.0"
   },
   "peerDependencies": {
     "typescript": "^6.0.2"
   },
   "dependencies": {
     "bun": "^1.3.12",
-    "commitlint": "^20.5.0",
     "globals": "^17.5.0",
     "yargs": "^17.7.2"
   },
