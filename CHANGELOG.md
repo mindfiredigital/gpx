@@ -1,5 +1,12 @@
 # gpx
 
+## 0.5.1
+
+### Patch Changes
+
+- d66cf46: added binary build workflow
+- fc4c2b3: Added binary build workflow
+
 ## 0.5.0
 
 ### Minor Changes
