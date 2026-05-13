@@ -26,45 +26,8 @@ export const runUseCommand = async (
     }
 
     const scope = local ? 'local' : 'global';
-    const warnings: string[] = [];
 
-    if (local && isInsideGitRepo()) {
-      const remoteUrl = getRemoteUrl('origin');
-      if (remoteUrl) {
-        const repoProfile = getGpxProfileFromRemote(remoteUrl);
-        if (repoProfile && repoProfile !== profileName) {
-          warnings.push(`⚠︎ You are switching to "${profileName}", locally
-         ⚠︎ Commits would be using "${profileName}"s initials
-         ⚠︎ You would not be able to push if "${profileName}" doesn't have write access to the remote`);
-        }
-      }
-    }
     applyProfileToGitConfig(profile, scope);
-
-    if (profile.ssh_key) {
-      const sshValidation = validateSshKeyForProfile(profile);
-      if (!sshValidation.exists) {
-        warnings.push(
-          `SSH key not found: ${profile.ssh_key}.\nGit identity switched successfully.\nFix: run gpx doctor ${profile.name} to diagnose SSH issues.`
-        );
-      } else {
-        if (!sshValidation.permissionOk) {
-          warnings.push(`SSH key permissions not strict: ${profile.ssh_key}`);
-        }
-        await upsertSshConfigForProfile(profile);
-      }
-    }
-
-    const remoteUpdates: RemoteUpdate[] = [];
-    if (isInsideGitRepo()) {
-      const result = updateRemoteForProfile(profile.name, scope);
-
-      remoteUpdates.push(...result.updated);
-
-      for (const httpsWarn of result.httpsWarnings) {
-        warnings.push(httpsWarn);
-      }
-    }
 
     if (!local) {
       await saveActive({
@@ -87,7 +50,6 @@ export const runUseCommand = async (
     if (json) {
       printJson({ success: true, data: payload });
     } else {
-      for (const warning of warnings) printWarn(`Warning: ${warning}`);
       printSuccess(`Switched to ${profile.name} (${scope})`);
     }
 

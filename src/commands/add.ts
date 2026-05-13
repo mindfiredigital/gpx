@@ -4,10 +4,6 @@ import { ask } from '../utils/prompt';
 import { handleCommandError, printHuman, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import type { AddArgs } from '../lib/types/AddCommand.type';
-import { generateSshKeyForProfile } from '../core/sshConfigManagement/generateSshKey';
-import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
-import { githubOAuthFlow } from '../core/githubManagement/githubOAuthFlow';
-import { uploadSshKeyToGithub } from '../core/githubManagement/uploadSshToGithub';
 
 export const runAddCommand = async (args: AddArgs): Promise<number> => {
   try {

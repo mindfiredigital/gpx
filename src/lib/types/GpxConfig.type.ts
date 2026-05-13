@@ -19,20 +19,4 @@ type GitIdentity = {
   signingKey: string | null;
 };
 
-interface GithubPersonalAccessToken {
-  github_tokens?: Record<string, string>;
-}
-
-interface UpdateRemoteProfile {
-  updated: { remote: string; oldUrl: string; newUrl: string }[];
-  httpsWarnings: string[];
-}
-
-export type {
-  GpxConfig,
-  GlobalCliOptions,
-  GitScope,
-  GitIdentity,
-  GithubPersonalAccessToken,
-  UpdateRemoteProfile,
-};
+export type { GpxConfig, GlobalCliOptions, GitScope, GitIdentity };
