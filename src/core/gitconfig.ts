@@ -1,11 +1,12 @@
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import type { Profile } from '../lib/types/Profile.type';
-import type { GitScope, GitIdentity } from '../lib/types/GpxConfig.type';
+import type { GitScope, GitIdentity, UpdateRemoteProfile } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
 import { ProfileError } from './profileManagement/errorClass';
 import { backupFile } from './profileManagement/storeBackup';
 import { listProfiles } from './profileManagement/profiles';
+import { GPX_HOST_ALIAS_REGEX } from '../lib/validations';
 
 const run = (cmd: string): string => {
   return execSync(cmd, { encoding: 'utf-8' }).trim();

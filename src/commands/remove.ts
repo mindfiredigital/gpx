@@ -11,7 +11,7 @@ export const runRemoveCommand = async (
   try {
     const profile = getProfile(profileName);
     await removeProfile(profileName, force);
-    await removeSshConfigForProfile(profileName);
+    await removeSshConfigForProfile(profileName, profile?.ssh_key);
 
     if (json) {
       printJson({
