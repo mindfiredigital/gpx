@@ -184,9 +184,3 @@ bun run test:coverage   # get test coverage
 bun run lint            # check for linting errors
 bun run format          # format using prettier
 ```
-
----
-
-## License : [MIT](./LICENSE)
-## Code Of Conduct : [GUIDELINES](./CODE_OF_CONDUCT.md)
-## Contributing : [Rules](./CONTRIBUTING.md)
