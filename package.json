@@ -1,9 +1,10 @@
 {
-  "name": "gpx-tool",
-  "version": "0.5.0",
+  "name": "gpx",
+  "version": "0.1.0",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
+  "private": true,
   "keywords": [
     "git",
     "profile",
@@ -14,21 +15,9 @@
   ],
   "author": "mindfire-test",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mindfiredigital/gpx"
-  },
   "bin": {
-    "gpx": "./dist/cli.js"
+    "gpx": "./src/cli.ts"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
-  ],
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
@@ -37,18 +26,13 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prepare": "husky",
-    "changeset": "changeset",
-    "release": "bun run build && changeset publish",
-    "version": "changeset version"
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
     "@types/node": "^25.6.0",
-    "@types/yargs": "^17.0.35",
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
     "@vitest/coverage-v8": "^4.1.4",
@@ -57,16 +41,15 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "tsx": "^4.21.0",
-    "vitest": "^4.1.4",
-    "commitlint": "^20.5.0"
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "bun": "^1.3.12",
-    "globals": "^17.5.0",
-    "yargs": "^17.7.2"
+    "clipanion": "^4.0.0-rc.4",
+    "commitlint": "^20.5.0",
+    "globals": "^17.5.0"
   },
   "lint-staged": {
     "src/**/*.ts": [
