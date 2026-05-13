@@ -2,6 +2,8 @@ import { getProfile } from '../core/profileManagement/profiles';
 import { saveActive } from '../core/profileManagement/activeStore';
 import {
   applyProfileToGitConfig,
+  getGpxProfileFromRemote,
+  getRemoteUrl,
   isInsideGitRepo,
   updateRemoteForProfile,
 } from '../core/gitconfig';
@@ -24,10 +26,21 @@ export const runUseCommand = async (
     }
 
     const scope = local ? 'local' : 'global';
+    const warnings: string[] = [];
 
+    if (local && isInsideGitRepo()) {
+      const remoteUrl = getRemoteUrl('origin');
+      if (remoteUrl) {
+        const repoProfile = getGpxProfileFromRemote(remoteUrl);
+        if (repoProfile && repoProfile !== profileName) {
+          warnings.push(`⚠︎ You are switching to "${profileName}", locally
+         ⚠︎ Commits would be using "${profileName}"s initials
+         ⚠︎ You would not be able to push if "${profileName}" doesn't have write access to the remote`);
+        }
+      }
+    }
     applyProfileToGitConfig(profile, scope);
 
-    const warnings: string[] = [];
     if (profile.ssh_key) {
       const sshValidation = validateSshKeyForProfile(profile);
       if (!sshValidation.exists) {
@@ -74,8 +87,8 @@ export const runUseCommand = async (
     if (json) {
       printJson({ success: true, data: payload });
     } else {
-      printSuccess(`Switched to ${profile.name} (${scope})`);
       for (const warning of warnings) printWarn(`Warning: ${warning}`);
+      printSuccess(`Switched to ${profile.name} (${scope})`);
     }
 
     return ExitCode.SUCCESS;
