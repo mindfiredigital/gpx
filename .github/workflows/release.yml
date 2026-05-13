@@ -4,16 +4,10 @@ on:
   push:
     branches:  
       - main
-      - chore/release
 
 jobs: 
     release:
-        name: Release
         runs-on: ubuntu-latest
-        permissions: 
-          contents: write
-          pull-requests: write
-
 
         steps:
             - name: Checkout
@@ -29,12 +23,10 @@ jobs:
               run: bun run build
               
             - name: Create Publish
-              uses: changesets/action@v1
+              uses: changesets/actions@v1
               with:
-                publish: bun run release
+                publish: bun run publish
                 version: bun run version
-                commit: "chore: version packages"
-                title: "chore: version packages"
               env: 
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

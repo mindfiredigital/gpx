@@ -5,6 +5,7 @@ import type { GitScope, GitIdentity } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
 import { ProfileError } from './profileManagement/errorClass';
 import { backupFile } from './profileManagement/storeBackup';
+import { listProfiles } from './profileManagement/profiles';
 
 const run = (cmd: string): string => {
   return execSync(cmd, { encoding: 'utf-8' }).trim();

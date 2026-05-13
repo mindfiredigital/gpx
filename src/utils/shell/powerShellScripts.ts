@@ -23,12 +23,6 @@ function global:__gpx_update_prompt_profile {
 }
 
 function global:__gpx_on_directory_change {
-    try {
-        $autoDetect = gpx config get auto-detect --quiet 2>$null
-        if ($autoDetect -match "true") {
-            gpx autodetect --quiet 2>$null | Out-Null
-        }
-    } catch {}
     __gpx_update_prompt_profile
 }
 
