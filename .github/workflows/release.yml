@@ -6,35 +6,136 @@ on:
       - main
       - chore/release
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs: 
-    release:
-        name: Release
-        runs-on: ubuntu-latest
-        permissions: 
-          contents: write
-          pull-requests: write
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-            - name: Setup Bun
-              uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        
+      - name: Build
+        run: bun run build
+          
+      - name: Create Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: bun run release
+          version: bun run version
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-            - name: Install dependencies
-              run: bun install --frozen-lockfile
-            
-            - name: Build
-              run: bun run build
-              
-            - name: Create Publish
-              uses: changesets/action@v1
-              with:
-                publish: bun run release
-                version: bun run version
-                commit: "chore: version packages"
-                title: "chore: version packages"
-              env: 
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  build-binaries:
+    name: Build Binaries
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: bun-windows-x64
+            artifact: gpx-windows-x64.exe
+
+          - os: windows-latest
+            target: bun-windows-arm64
+            artifact: gpx-windows-arm64.exe
+
+          - os: ubuntu-latest
+            target: bun-linux-x64
+            artifact: gpx-linux-x64
+
+          - os: ubuntu-latest
+            target: bun-linux-arm64
+            artifact: gpx-linux-arm64
+
+          - os: macos-latest
+            target: bun-darwin-arm64
+            artifact: gpx-darwin-arm64
+
+          - os: macos-latest
+            target: bun-darwin-x64
+            artifact: gpx-darwin-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build binary
+        shell: bash
+        run: |
+          mkdir -p dist
+          bun build ./src/cli.ts --compile --target=${{ matrix.target }} --outfile dist/${{ matrix.artifact }}
+        env:
+          GPX_CLIENT_ID: ${{ vars.GPX_CLIENT_ID }}
+
+      - name: Archive Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
+
+  upload-release:
+    name: Upload Release Binaries
+    needs: build-binaries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: binaries
+          merge-multiple: true
+
+      - name: Get version from package.json
+        id: version
+        run: echo "version=$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT
+
+      - name: Upload binaries to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: gpx v${{ steps.version.outputs.version }}
+          body: |
+            ## gpx v${{ steps.version.outputs.version }}
+
+            ### 📦 Or install via npm
+            ```bash
+            npm install -g gpx-tool
+            ```
+
+            ### 📥 Download
+            Download the binary for your platform below:
+          draft: false
+          files: binaries/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
