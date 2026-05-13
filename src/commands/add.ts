@@ -4,6 +4,8 @@ import { ask } from '../utils/prompt';
 import { handleCommandError, printHuman, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import type { AddArgs } from '../lib/types/AddCommand.type';
+import { generateSshKeyForProfile } from '../core/sshConfigManagement/generateSshKey';
+import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 
 export const runAddCommand = async (args: AddArgs): Promise<number> => {
   try {
@@ -57,6 +59,23 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       throw new ProfileError('Both display name and email are required', ExitCode.INVALID_INPUT);
     }
 
+    if (args.generateSsh && args.sshKey) {
+      throw new ProfileError(
+        'use either --generate-ssh or --ssh-key, not both',
+        ExitCode.INVALID_INPUT
+      );
+    }
+
+    let sshKeyPath = args.sshKey || undefined;
+    let generateSsh:
+      | { privateKeyPath: string; publicKeyPath: string; publicKey: string }
+      | undefined;
+
+    if (args.generateSsh) {
+      generateSsh = generateSshKeyForProfile(args.name, email);
+      sshKeyPath = generateSsh.privateKeyPath;
+    }
+
     const profileToAdd = {
       name: args.name,
       display_name: displayName,
@@ -85,7 +104,8 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       printJson({ success: true, data: payload });
     } else {
       printSuccess(`Profile added: ${args.name}`);
-      if (generateSsh) printHuman(`Public key added to GitHub`);
+      if (generateSsh)
+        printHuman(`Public key (add this to GitHub/GitLab): \n${generateSsh.publicKey}`);
     }
 
     return ExitCode.SUCCESS;

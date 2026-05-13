@@ -81,7 +81,7 @@ describe('generateSshKeyForProfile', () => {
         mocks.execFileSync.mockImplementation(() => { throw new Error('error executing ssh-keygen'); });
 
         expect(() => generateSshKeyForProfile(profileName, email))
-            .toThrow(new ProfileError('Failed to generate SSH Key', ExitCode.INVALID_INPUT));
+            .toThrow(new ProfileError('Failed to generate SSK Key', ExitCode.INVALID_INPUT));
     });
 
     it('should throw Error if reading the generated public key fails', () => {

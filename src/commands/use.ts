@@ -12,7 +12,6 @@ import { handleCommandError, printJson, printSuccess, printWarn } from '../utils
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 import { validateSshKeyForProfile } from '../core/sshConfigManagement/sshKeyExistencePermissionCheck';
-import type { RemoteUpdate } from '../lib/types/RemoteUpdate.type';
 
 export const runUseCommand = async (
   profileName: string,
@@ -29,6 +28,21 @@ export const runUseCommand = async (
 
     applyProfileToGitConfig(profile, scope);
 
+    const warnings: string[] = [];
+    if (profile.ssh_key) {
+      const sshValidation = validateSshKeyForProfile(profile);
+      if (!sshValidation.exists) {
+        warnings.push(
+          `SSH key not found: ${profile.ssh_key}.\nGit identity switched successfully.\nFix: run gpx doctor ${profile.name} to diagnose SSH issues.`
+        );
+      } else {
+        if (!sshValidation.permissionOk) {
+          warnings.push(`SSH key permissions not strict: ${profile.ssh_key}`);
+        }
+        await upsertSshConfigForProfile(profile);
+      }
+    }
+
     if (!local) {
       await saveActive({
         global: profile.name,
@@ -43,7 +57,6 @@ export const runUseCommand = async (
         email: profile.email,
         scope,
       },
-      remotes_updated: remoteUpdates,
       warnings,
     };
 
@@ -51,6 +64,7 @@ export const runUseCommand = async (
       printJson({ success: true, data: payload });
     } else {
       printSuccess(`Switched to ${profile.name} (${scope})`);
+      for (const warning of warnings) printWarn(`Warning: ${warning}`);
     }
 
     return ExitCode.SUCCESS;

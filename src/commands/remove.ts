@@ -2,7 +2,6 @@ import { getProfile, removeProfile } from '../core/profileManagement/profiles';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess } from '../utils/output';
 import { removeSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
-import { moveSshKeysToRemoved } from '../utils/moveSshOnRemove';
 
 export const runRemoveCommand = async (
   profileName: string,
@@ -12,9 +11,7 @@ export const runRemoveCommand = async (
   try {
     const profile = getProfile(profileName);
     await removeProfile(profileName, force);
-    await removeSshConfigForProfile(profileName, profile?.ssh_key);
-
-    if (profile?.ssh_key) moveSshKeysToRemoved(profile.ssh_key);
+    await removeSshConfigForProfile(profileName);
 
     if (json) {
       printJson({

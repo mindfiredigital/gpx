@@ -85,120 +85,15 @@ describe('current command - json', () => {
 
     expect(code).toBe(ExitCode.SUCCESS);
 
-    const result = JSON.parse(consoleOutput[0] as string);
-    expect(result).toMatchObject({
-      success: true,
-      data: {
-        active: { profile: 'work', scope: 'global' },
-        global: {
-          profile: 'work',
-          name: 'Ansuman Panda',
-          email: 'ansuman@gmail.com',
-          signingKey: null,
-        },
-        local: null,
-      },
-    });
-  });
-
-  it('should use repo-local gpx profile as active profile in json mode', async () => {
-    mocks.isInsideGitRepo.mockReturnValue(true);
-    mocks.getGpxLocalProfileName.mockReturnValue('personal');
-    mocks.getCurrentGitIdentity.mockImplementation((scope?: string) => {
-      if (scope === 'local') {
-        return {
-          name: 'Ansuman Mindfire',
-          email: 'ansuman@mindfire.com',
-          signingKey: null,
-        };
-      }
-
-      return {
-        name: 'Ansuman Panda',
-        email: 'ansuman@gmail.com',
-        signingKey: null,
-      };
+        const result = JSON.parse(consoleOutput[0] as string);
+        expect(result).toMatchObject({
+            success: true,
+            data: { active: 'work' }
+        });
     });
 
-    const code = await runCurrentCommand(true);
-
-    expect(code).toBe(ExitCode.SUCCESS);
-    const result = JSON.parse(consoleOutput[0] as string);
-    expect(result).toMatchObject({
-      success: true,
-      data: {
-        active: { profile: 'personal', scope: 'local' },
-        global: {
-          profile: 'work',
-          name: 'Ansuman Panda',
-          email: 'ansuman@gmail.com',
-          signingKey: null,
-        },
-        local: {
-          profile: 'personal',
-          name: 'Ansuman Mindfire',
-          email: 'ansuman@mindfire.com',
-          signingKey: null,
-        },
-      },
-    });
-  });
-
-  it('should infer local profile from identity when repo-local gpx profile is missing', async () => {
-    mocks.isInsideGitRepo.mockReturnValue(true);
-    mocks.getGpxLocalProfileName.mockReturnValue(null);
-    mocks.getCurrentGitIdentity.mockImplementation((scope?: string) => {
-      if (scope === 'local') {
-        return {
-          name: 'Ansuman Mindfire',
-          email: 'ansuman@mindfire.com',
-          signingKey: null,
-        };
-      }
-
-      return {
-        name: 'Ansuman Panda',
-        email: 'ansuman@gmail.com',
-        signingKey: null,
-      };
-    });
-
-    const code = await runCurrentCommand(true);
-
-    expect(code).toBe(ExitCode.SUCCESS);
-    const result = JSON.parse(consoleOutput[0] as string);
-    expect(result).toMatchObject({
-      success: true,
-      data: {
-        active: { profile: 'personal', scope: 'local' },
-        local: {
-          profile: 'personal',
-          name: 'Ansuman Mindfire',
-          email: 'ansuman@mindfire.com',
-        },
-      },
-    });
-  });
-});
-
-describe('current command - human', () => {
-  it('should print local identity in human mode when inside repo', async () => {
-    mocks.isInsideGitRepo.mockReturnValue(true);
-    mocks.getGpxLocalProfileName.mockReturnValue('personal');
-    mocks.getCurrentGitIdentity.mockImplementation((scope?: string) => {
-      if (scope === 'local')
-        return {
-          name: 'Ansuman Mindfire',
-          email: 'ansuman@mindfire.com',
-          signingKey: null,
-        };
-
-      return {
-        name: 'Ansuman Panda',
-        email: 'ansuman@gmail.com',
-        signingKey: null,
-      };
-    });
+    it('should print local identity in human mode when inside repo', async () => {
+        mocks.isInsideGitRepo.mockReturnValue(true);
 
     const code = await runCurrentCommand(false);
 

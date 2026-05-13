@@ -25,13 +25,14 @@ const writeSshConfig = async (content: string): Promise<void> => {
 
 const buildSshBlock = (profile: Profile): string => {
   const keyPath = profile.ssh_key ?? '';
-  return `# BEGIN gpx:${profile.name}
-Host github.com-${profile.name}
-    Hostname github.com
-    User git
-    IdentityFile "${keyPath}"
-    IdentitiesOnly yes
-# END gpx:${profile.name}
+  return `
+    # BEGIN gpx:${profile.name}
+    Host github.com-${profile.name}
+        Hostname github.com
+        User git
+        IdentityFile ${keyPath}
+        IdentitiesOnly yes
+    # END gpx:${profile.name}
     `.trim();
 };
 

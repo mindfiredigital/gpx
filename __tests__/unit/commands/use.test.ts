@@ -78,18 +78,15 @@ describe('use command', () => {
   it('should return json payload when --json is used', async () => {
     const code = await runUseCommand('work', false, true);
 
-    expect(code).toBe(ExitCode.SUCCESS);
-    const result = JSON.parse(consoleOutput[0] as string);
-    expect(result).toMatchObject({
-      success: true,
-      data: {
-        active: {
-          name: 'work',
-          scope: 'global'
-        },
-      },
+        expect(code).toBe(ExitCode.SUCCESS);
+        const result = JSON.parse(consoleOutput[0] as string);
+        expect(result).toMatchObject({
+            success: true,
+            data: {
+                active: { name: 'work', scope: 'global' }
+            }
+        });
     });
-  });
 
   it('should return "profile not found" when profile does not exist', async () => {
     mocks.getProfile.mockReturnValue(undefined);
