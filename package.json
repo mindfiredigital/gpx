@@ -12,7 +12,7 @@
     "ssh",
     "cli"
   ],
-  "author": "mindfire-test",
+  "author": "mindfiredigital",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -32,6 +32,7 @@
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
+    "build:binary": "bun run scripts/build.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
