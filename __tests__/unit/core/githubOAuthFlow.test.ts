@@ -31,7 +31,9 @@ vi.mock('../../../src/utils/getGitConfig', () => ({
 }));
 
 describe('githubOAuthFlow', () => {
+    const profileName = 'work';
     const mockToken = 'mock_token';
+    const mockUserData = { name: 'Ansuman Panda', email: 'ansuman@gmail.com' };
     const mockDeviceCodeResponse = {
         device_code: 'mock_device_code',
         user_code: 'MOCK-1234',
@@ -43,13 +45,48 @@ describe('githubOAuthFlow', () => {
         vi.clearAllMocks();
     });
 
+    it('should return existing token and user data if token already saved', async () => {
+        mocks.getGithubToken.mockResolvedValue(mockToken);
+        mocks.fetchGithubUser.mockResolvedValue(mockUserData);
+
+        const result = await githubOAuthFlow(profileName);
+
+        expect(mocks.requestDeviceCode).not.toHaveBeenCalled();
+        expect(mocks.pollAccessToken).not.toHaveBeenCalled();
+
+        expect(result).toEqual({ ...mockUserData, token: mockToken });
+    });
+
+    it('should run full OAuth flow if no token saved', async () => {
+        mocks.getGithubToken.mockResolvedValue(null);
+        mocks.requestDeviceCode.mockResolvedValue(mockDeviceCodeResponse);
+        mocks.pollAccessToken.mockResolvedValue(mockToken);
+        mocks.fetchGithubUser.mockResolvedValue(mockUserData);
+        mocks.addGithubToken.mockResolvedValue(undefined);
+
+        const result = await githubOAuthFlow(profileName);
+
+        expect(mocks.requestDeviceCode).toHaveBeenCalledOnce();
+
+        expect(mocks.pollAccessToken).toHaveBeenCalledWith(
+            mockDeviceCodeResponse.device_code,
+            mockDeviceCodeResponse.interval
+        );
+
+        expect(mocks.addGithubToken).toHaveBeenCalledWith(profileName, mockToken);
+
+        expect(mocks.fetchGithubUser).toHaveBeenCalledWith(mockToken);
+
+        expect(result).toEqual({ ...mockUserData, token: mockToken });
+    });
+
     it('should throw if requestDeviceCode fails', async () => {
         mocks.getGithubToken.mockResolvedValue(null);
         mocks.requestDeviceCode.mockRejectedValue(
             new ProfileError('error getting device code', ExitCode.INVALID_INPUT)
         );
 
-        await expect(githubOAuthFlow())
+        await expect(githubOAuthFlow(profileName))
             .rejects.toThrow('error getting device code');
 
         expect(mocks.pollAccessToken).not.toHaveBeenCalled();
@@ -62,7 +99,7 @@ describe('githubOAuthFlow', () => {
             new ProfileError('Access denied by user', ExitCode.INVALID_INPUT)
         );
 
-        await expect(githubOAuthFlow())
+        await expect(githubOAuthFlow(profileName))
             .rejects.toThrow('Access denied by user');
 
         expect(mocks.addGithubToken).not.toHaveBeenCalled();
@@ -77,7 +114,7 @@ describe('githubOAuthFlow', () => {
             new ProfileError('error fetching github user', ExitCode.INVALID_INPUT)
         );
 
-        await expect(githubOAuthFlow())
+        await expect(githubOAuthFlow(profileName))
             .rejects.toThrow('error fetching github user');
     });
 });

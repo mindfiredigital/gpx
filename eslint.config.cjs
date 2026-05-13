@@ -8,7 +8,8 @@ module.exports = [
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.builtin
+        ...globals.builtin,
+        Bun: true
       }
     }
   },
