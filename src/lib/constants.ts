@@ -27,7 +27,7 @@ const CONFIG_DIR: string = path.join(os.homedir(), '.config', 'gpx');
 const CONFIG_FILE: string = path.join(CONFIG_DIR, 'config.json');
 
 // Device Flow - add + authenticate profile
-const CLIENT_ID = 'Ov23li0ZL83hkSL1opAY';
+const CLIENT_ID = process.env.GPX_CLIENT_ID || '';
 const DEVICE_CODE_URL = 'https://github.com/login/device/code';
 const TOKEN_URL = 'https://github.com/login/oauth/access_token';
 const API_BASE = 'https://api.github.com';
