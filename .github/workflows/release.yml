@@ -121,15 +121,10 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: gpx v${{ steps.version.outputs.version }}
           body: |
-            ## gpx v${{ steps.version.outputs.version }}
-
-            ### 📦 Or install via npm
+            ### 📦 Install via npm
             ```bash
             npm install -g gpx-tool
             ```
-
-            ### 📥 Download
-            Download the binary for your platform below:
           draft: false
           files: binaries/*
           generate_release_notes: true
