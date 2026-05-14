@@ -1,5 +1,11 @@
 # gpx
 
+## 0.6.2
+
+### Patch Changes
+
+- e0de949: Update Release docs
+
 ## 0.6.1
 
 ### Patch Changes
