@@ -54,10 +54,6 @@ jobs:
             target: bun-windows-x64
             artifact: gpx-windows-x64.exe
 
-          - os: windows-latest
-            target: bun-windows-arm64
-            artifact: gpx-windows-arm64.exe
-
           - os: ubuntu-latest
             target: bun-linux-x64
             artifact: gpx-linux-x64
