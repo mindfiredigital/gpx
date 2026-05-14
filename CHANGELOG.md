@@ -1,5 +1,11 @@
 # gpx
 
+## 0.6.0
+
+### Minor Changes
+
+- 66346f3: Release binary-builds
+
 ## 0.5.0
 
 ### Minor Changes
