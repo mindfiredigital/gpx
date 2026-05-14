@@ -1,5 +1,11 @@
 # gpx
 
+## 0.6.1
+
+### Patch Changes
+
+- 29d5a6e: update binary-build workflow
+
 ## 0.6.0
 
 ### Minor Changes
