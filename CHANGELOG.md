@@ -1,5 +1,13 @@
 # gpx
 
+## 0.6.2
+
+### Patch Changes
+
+- 6b6e4a4: Update Release docs
+- ee5389a: update bun-lock
+- 5ba4712: include client_id
+
 ## 0.6.1
 
 ### Patch Changes
