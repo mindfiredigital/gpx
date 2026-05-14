@@ -43,6 +43,10 @@
     "release": "bun run build && changeset publish",
     "version": "changeset version"
   },
+  "resolutions": {
+    "strip-ansi": "6.0.1",
+    "ansi-regex": "5.0.1"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
     "@commitlint/config-conventional": "^20.5.0",
