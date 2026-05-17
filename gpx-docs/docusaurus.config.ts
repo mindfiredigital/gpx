@@ -7,8 +7,8 @@ const config: Config = {
   tagline: 'Git Profile eXchanger - nvm for Git Identities',
   favicon: 'img/logo.png',
 
-  url: 'https://your-docusaurus-site.example.com',
-  baseUrl: '/',
+  url: 'https://mindfiredigital.github.io',
+  baseUrl: '/gpx/',
 
   organizationName: 'mindfiredigital',
   projectName: 'gpx',
@@ -38,7 +38,19 @@ const config: Config = {
 
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
+    metadata: [
+      {
+        name: 'description',
+        content: 'Git Profile eXchanger - switch between git identities instantly',
+      },
+      {
+        name: 'keywords',
+        content: 'gpx, git, profile, switcher, identity, ssh, cli, git profile manager, mindfire, mindfiredigital, open, source, opensource, foss, FOSS',
+      },
+    ],
     colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
       respectPrefersColorScheme: true,
     },
     navbar: {
@@ -56,7 +68,7 @@ const config: Config = {
         },
         {
           href: 'https://github.com/mindfiredigital/gpx',
-          label: 'GitHub',
+          className: 'header--github-link', 'aria-label': 'GitHub repository',
           position: 'right',
         },
       ],
