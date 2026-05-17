@@ -1,5 +1,12 @@
 # gpx
 
+## 0.6.3
+
+### Patch Changes
+
+- 4a1abef: add client_id to code
+- 6d0abfd: check changeset versioning
+
 ## 0.6.2
 
 ### Patch Changes
