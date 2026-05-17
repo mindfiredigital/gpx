@@ -4,7 +4,6 @@ on:
   push:
     branches:  
       - main
-      - fix/merge-gpx
 
 permissions:
   contents: write
