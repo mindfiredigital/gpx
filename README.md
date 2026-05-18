@@ -8,7 +8,7 @@ As a **nvm but for git profiles**. One command to switch your name, email, and S
 
 ## Installation
 ```bash
-npm install -g gpx-tool
+npm install -g @mindfiredigital/gpx
 ```
 
 ---

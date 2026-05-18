@@ -9,7 +9,7 @@ gpx is currently available via **npm**.
 The easiest way to install gpx right now is via npm. You need **Node.js** installed on your machine.
 
 ```
-npm install -g gpx-tool
+npm install -g @mindfiredigital/gpx
 ```
 
 Verify the installation:
