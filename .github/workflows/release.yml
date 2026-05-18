@@ -120,7 +120,7 @@ jobs:
           body: |
             ### 📦 Install via npm
             ```bash
-            npm install -g gpx-tool
+            npm install -g @mindfiredigital/gpx
             ```
           draft: false
           files: binaries/*
