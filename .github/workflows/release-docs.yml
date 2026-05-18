@@ -1,0 +1,66 @@
+name: Deploy Docs Workflow
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gpx-docs/**'
+
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy Docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install & Build dependencies
+        run: |
+          cd gpx-docs
+          npm install
+          npm run build
+
+      - name: Fetch branches
+        run: git fetch origin
+
+      - name: Set Git user
+        run: |
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+
+      - name: Deploy to gh-pages
+        run: |
+          mkdir -p /tmp/docs-build
+          shopt -s dotglob
+          cp -r gpx-docs/build/* /tmp/docs-build/
+          shopt -u dotglob
+
+          git stash push
+          git checkout gh-pages || git checkout -b gh-pages
+
+          rm -rf *
+          cp -r /tmp/docs-build/* .
+
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add . -f
+            git commit -m "chore(docs): deploy docusaurus to gh-pages" --no-verify
+          else
+            echo "No changes to deploy"
+          fi
+      
+      - name: Push to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin gh-pages --force || echo "No changes to push"

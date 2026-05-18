@@ -1,17 +1,12 @@
 ## Create a new profile
 
 ### Commands
-### With GitHub OAuth 
 ```
 gpx add <profile_name>
 ```
-- Opens browser for GitHub OAuth
-- Fetches username + associated email from GitHub
-
-### Interactive mode (prompts for each field)
-```
-gpx add <profile_name>
-```
+- Prompts user to input name + email
+- Prints the public ssh-key in command-line
+- User uploads this key to their respective github account
 
 ### Non-interactive mode (all fields via flags)
 ```
@@ -29,7 +24,6 @@ gpx add <profile_name> \
 gpx add <profile_name> \
   --display-name "<github_username>" \
   --email "<github_email>" \
-  --generate-ssh \
   --no-interactive
 ```
 
