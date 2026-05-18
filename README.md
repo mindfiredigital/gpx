@@ -16,7 +16,7 @@ npm install -g @mindfiredigital/gpx
 ## Commands
 
 ### `gpx add <name>`
-Add a new profile. Runs GitHub OAuth -> generates SSH key -> uploads to GitHub automatically.
+Add a new profile. Cli Prompts to enter name + email -> generates SSH key and prints in the command line -> user is needed to upload this public ssh key to their respectice github account.
 
 ```bash
 gpx add work
