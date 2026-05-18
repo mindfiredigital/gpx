@@ -4,7 +4,6 @@ on:
   push:
     branches:  
       - main
-      - fix/merge-gpx
 
 permissions:
   contents: write
@@ -87,8 +86,6 @@ jobs:
         run: |
           mkdir -p dist
           bun build ./src/cli.ts --compile --target=${{ matrix.target }} --outfile dist/${{ matrix.artifact }}
-        env:
-          GPX_CLIENT_ID: ${{ vars.GPX_CLIENT_ID }}
 
       - name: Archive Artifact
         uses: actions/upload-artifact@v4
@@ -123,7 +120,7 @@ jobs:
           body: |
             ### 📦 Install via npm
             ```bash
-            npm install -g gpx-tool
+            npm install -g @mindfiredigital/gpx
             ```
           draft: false
           files: binaries/*
