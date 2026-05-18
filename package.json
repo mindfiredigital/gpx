@@ -1,6 +1,6 @@
 {
   "name": "gpx-tool",
-  "version": "0.5.0",
+  "version": "0.6.3",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
@@ -12,7 +12,7 @@
     "ssh",
     "cli"
   ],
-  "author": "mindfire-test",
+  "author": "mindfiredigital",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -32,6 +32,7 @@
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
+    "build:binary": "bun run scripts/build.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -41,6 +42,10 @@
     "changeset": "changeset",
     "release": "bun run build && changeset publish",
     "version": "changeset version"
+  },
+  "resolutions": {
+    "strip-ansi": "6.0.1",
+    "ansi-regex": "5.0.1"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
@@ -52,6 +57,7 @@
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
     "@vitest/coverage-v8": "^4.1.4",
+    "commitlint": "^20.5.0",
     "eslint": "^10.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",

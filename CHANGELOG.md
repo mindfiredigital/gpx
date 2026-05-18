@@ -1,5 +1,32 @@
 # gpx
 
+## 0.6.3
+
+### Patch Changes
+
+- 4a1abef: add client_id to code
+- 6d0abfd: check changeset versioning
+
+## 0.6.2
+
+### Patch Changes
+
+- 6b6e4a4: Update Release docs
+- ee5389a: update bun-lock
+- 5ba4712: include client_id
+
+## 0.6.1
+
+### Patch Changes
+
+- 29d5a6e: update binary-build workflow
+
+## 0.6.0
+
+### Minor Changes
+
+- 66346f3: Release binary-builds
+
 ## 0.5.0
 
 ### Minor Changes
