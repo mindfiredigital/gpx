@@ -9,7 +9,13 @@ import { handleCommandError, printHuman, printJson, printSuccess } from '../util
 
 export const runEditCommand = async (
   profileName: string,
-  options: { sshKey?: string; gpgKey?: string; signing?: boolean },
+  options: {
+    displayName?: string;
+    email?: string;
+    sshKey?: string;
+    gpgKey?: string;
+    signing?: boolean;
+  },
   json: boolean
 ): Promise<number> => {
   try {
@@ -18,14 +24,30 @@ export const runEditCommand = async (
       throw new ProfileError(`Profile not found: ${profileName}`, ExitCode.PROFILE_NOT_FOUND);
     }
 
-    if (!options.sshKey && !options.gpgKey && !options.signing)
+    if (
+      !options.displayName &&
+      !options.email &&
+      !options.sshKey &&
+      !options.gpgKey &&
+      !options.signing
+    )
       throw new ProfileError(
-        `Use atleast one of --ssh-key, --gpg-key or --signing`,
+        `Use: gpx edit --help \nEnter atleast one valid flag`,
         ExitCode.INVALID_INPUT
       );
 
     const updateProfileData: Partial<Profile> = {};
     const changes: string[] = [];
+
+    if (options.displayName !== undefined) {
+      updateProfileData.display_name = options.displayName;
+      changes.push(`display_name -> ${options.displayName}`);
+    }
+
+    if (options.email !== undefined) {
+      updateProfileData.email = options.email;
+      changes.push(`email -> ${options.email}`);
+    }
 
     if (options.sshKey !== undefined) {
       if (fs.existsSync(options.sshKey)) {

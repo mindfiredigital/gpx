@@ -215,13 +215,21 @@ await yargs(hideBin(process.argv))
     (builder: any) =>
       builder
         .positional('name', { type: 'string', demandOption: true })
+        .option('display-name', { type: 'string' })
+        .option('email', { type: 'string' })
         .option('ssh-key', { type: 'string' })
         .option('gpg-key', { type: 'string' })
         .option('signing', { type: 'boolean' }),
     async (argv: any) => {
       process.exitCode = await runEditCommand(
         argv.name,
-        { sshKey: argv.sshKey, gpgKey: argv.gpgKey, signing: argv.signing },
+        {
+          displayName: argv.displayName,
+          email: argv.email,
+          sshKey: argv.sshKey,
+          gpgKey: argv.gpgKey,
+          signing: argv.signing,
+        },
         argv.json
       );
     }
