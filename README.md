@@ -8,7 +8,7 @@ As a **nvm but for git profiles**. One command to switch your name, email, and S
 
 ## Installation
 ```bash
-npm install -g gpx-tool
+npm install -g @mindfiredigital/gpx
 ```
 
 ---
@@ -16,7 +16,7 @@ npm install -g gpx-tool
 ## Commands
 
 ### `gpx add <name>`
-Add a new profile. Runs GitHub OAuth -> generates SSH key -> uploads to GitHub automatically.
+Add a new profile. Cli Prompts to enter name + email -> generates SSH key and prints in the command line -> user is needed to upload this public ssh key to their respectice github account.
 
 ```bash
 gpx add work

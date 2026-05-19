@@ -6,8 +6,6 @@ import { ProfileError } from '../core/profileManagement/errorClass';
 import type { AddArgs } from '../lib/types/AddCommand.type';
 import { generateSshKeyForProfile } from '../core/sshConfigManagement/generateSshKey';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
-import { githubOAuthFlow } from '../core/githubManagement/githubOAuthFlow';
-import { uploadSshKeyToGithub } from '../core/githubManagement/uploadSshToGithub';
 
 export const runAddCommand = async (args: AddArgs): Promise<number> => {
   try {
@@ -34,18 +32,7 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       | { privateKeyPath: string; publicKeyPath: string; publicKey: string }
       | undefined;
 
-    let token: string | undefined;
-    if (args.generateSsh) {
-      const oauthData = await githubOAuthFlow();
-      displayName = oauthData.name;
-      email = oauthData.email;
-      token = oauthData.token;
-
-      generateSsh = generateSshKeyForProfile(args.name, email);
-      sshKeyPath = generateSsh.privateKeyPath;
-      await uploadSshKeyToGithub(token, args.name, generateSsh.publicKey);
-    }
-
+    // Prompt for name and email
     if (!displayName || !email) {
       if (args.noInteractive) {
         throw new ProfileError(
@@ -53,12 +40,17 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
           ExitCode.INVALID_INPUT
         );
       }
-      if (!displayName) displayName = await ask(`Display Name:`);
-      if (!email) email = await ask(`Email:`);
+      if (!displayName) displayName = await ask(`Display Name: `);
+      if (!email) email = await ask(`Email: `);
     }
 
     if (!displayName || !email) {
       throw new ProfileError('Both display name and email are required', ExitCode.INVALID_INPUT);
+    }
+
+    if (args.generateSsh) {
+      generateSsh = generateSshKeyForProfile(args.name, email);
+      sshKeyPath = generateSsh.privateKeyPath;
     }
 
     const profileToAdd = {
@@ -89,7 +81,11 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       printJson({ success: true, data: payload });
     } else {
       printSuccess(`Profile added: ${args.name}`);
-      if (generateSsh) printHuman(`Public key added to GitHub`);
+      if (generateSsh) {
+        printHuman(`\nAdd this public key to your GitHub account:`);
+        printHuman(`https://github.com/settings/ssh/new\n`);
+        printHuman(generateSsh.publicKey);
+      }
     }
 
     return ExitCode.SUCCESS;
