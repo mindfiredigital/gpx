@@ -1,6 +1,6 @@
 {
   "name": "@mindfiredigital/gpx",
-  "version": "0.6.3",
+  "version": "1.0.0",
   "description": "Git Profile eXchanger - switch between git identities instantly",
   "module": "index.ts",
   "type": "module",
@@ -65,7 +65,8 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "tsx": "^4.21.0",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.4",
+    "commitlint": "^20.5.0"
   },
   "peerDependencies": {
     "typescript": "^6.0.2"
