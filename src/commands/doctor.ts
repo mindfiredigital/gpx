@@ -20,7 +20,7 @@ const printCheck = (check: CheckResult): void => {
     icon = '⚠';
     colorFn = fmt.yellow;
   } else {
-    icon = '✖';
+    icon = '✗';
     colorFn = fmt.red;
   }
   printHuman(`  ${colorFn(icon)} ${check.label}: ${check.message}`);
