@@ -25,6 +25,14 @@ const scopeFlag = (scope: GitScope): '--global' | '--local' => {
   return scope === 'local' ? '--local' : '--global';
 };
 
+const unsetConfigValue = (flag: '--global' | '--local', key: string): void => {
+  try {
+    run(`git config ${flag} --unset ${key}`);
+  } catch {
+    /* catch unset errors */
+  }
+};
+
 const ensureGitInstalled = (): void => {
   try {
     run('git --version');
@@ -107,6 +115,19 @@ const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): 
   }
 };
 
+const clearGitIdentity = (scope: GitScope = 'global'): void => {
+  ensureGitInstalled();
+
+  if (scope === 'local' && !isInsideGitRepo()) return;
+
+  const flag = scopeFlag(scope);
+
+  unsetConfigValue(flag, 'user.name');
+  unsetConfigValue(flag, 'user.email');
+  unsetConfigValue(flag, 'user.signingkey');
+  unsetConfigValue(flag, 'user.gpgsign');
+};
+
 const isInsideGitRepo = (): boolean => {
   ensureGitInstalled();
   try {
@@ -114,6 +135,12 @@ const isInsideGitRepo = (): boolean => {
   } catch {
     return false;
   }
+};
+
+const clearLocalProfileMarker = (): void => {
+  ensureGitInstalled();
+  if (!isInsideGitRepo()) return;
+  unsetConfigValue('--local', 'gpx.profile');
 };
 
 const getGitRepoRoot = (): string | null => {
@@ -191,6 +218,8 @@ export {
   findProfileNameByIdentity,
   getCurrentGitIdentity,
   getGpxLocalProfileName,
+  clearGitIdentity,
+  clearLocalProfileMarker,
   applyProfileToGitConfig,
   isInsideGitRepo,
   getGitRepoRoot,
