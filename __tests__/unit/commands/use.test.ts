@@ -6,6 +6,7 @@ import { runUseCommand } from '../../../src/commands/use';
 const { mocks } = vi.hoisted(() => ({
   mocks: {
     getProfile: vi.fn(),
+    updateProfile: vi.fn(),
     saveActive: vi.fn(),
     applyProfileToGitConfig: vi.fn(),
     isInsideGitRepo: vi.fn(),
@@ -15,6 +16,7 @@ const { mocks } = vi.hoisted(() => ({
 
 vi.mock('../../../src/core/profileManagement/profiles', () => ({
   getProfile: mocks.getProfile,
+  updateProfile: mocks.updateProfile
 }));
 
 vi.mock('../../../src/core/profileManagement/activeStore', () => ({
