@@ -30,7 +30,7 @@ export const runEditCommand = async (
       !options.email &&
       !options.sshKey &&
       !options.gpgKey &&
-      !options.signing
+      options.signing === undefined
     )
       throw new ProfileError(
         `Use: gpx edit --help \nEnter atleast one valid flag`,
