@@ -17,7 +17,7 @@ export async function runRunCommand(
 
     if (commandArgs.length === 0) {
       throw new ProfileError(
-        'No command specified. Usage: gpx run <profile> -- <command>',
+        'No command specified. Use: gpx run <profile> <command>',
         ExitCode.INVALID_INPUT
       );
     }

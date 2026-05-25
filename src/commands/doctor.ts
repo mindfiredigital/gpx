@@ -20,10 +20,10 @@ const printCheck = (check: CheckResult): void => {
     icon = '⚠';
     colorFn = fmt.yellow;
   } else {
-    icon = '✖';
+    icon = '✗';
     colorFn = fmt.red;
   }
-  printHuman(`  ${colorFn(icon)} ${check.label}: ${check.message}`);
+  printHuman(`  ${colorFn(icon)}  ${check.label}: ${check.message}`);
 };
 
 export const runDoctorCommand = async (
