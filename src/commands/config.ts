@@ -1,6 +1,6 @@
 import { loadConfig, saveConfig } from '../core/profileManagement/configStore';
 import { ExitCode } from '../lib/constants';
-import { handleCommandError, printJson, printHuman } from '../utils/output';
+import { handleCommandError, printJson, printHuman, fmt } from '../utils/output';
 
 const runConfigGetCommand = async (json: boolean): Promise<number> => {
   try {
@@ -13,7 +13,7 @@ const runConfigGetCommand = async (json: boolean): Promise<number> => {
         data: { auto_detect: value },
       });
     } else {
-      printHuman(`auto detect = ${value}`);
+      printHuman(`${value ? fmt.green(`true`) : fmt.red(`false`)}`);
     }
 
     return ExitCode.SUCCESS;
@@ -34,7 +34,7 @@ const runConfigSetCommand = async (value: boolean, json: boolean): Promise<numbe
         data: { auto_detect: value },
       });
     } else {
-      printHuman(`auto detect = ${value}`);
+      printHuman(`auto_detect set to ${value ? fmt.green(`${value}`) : fmt.red(`${value}`)}`);
     }
 
     return ExitCode.SUCCESS;
