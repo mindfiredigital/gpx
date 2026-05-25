@@ -2,7 +2,7 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { runAddCommand } from './commands/add';
+import { runSshAddCommand, runPatAddCommand } from './commands/add';
 import { runLsCommand } from './commands/ls';
 import { runUseCommand } from './commands/use';
 import { runCurrentCommand } from './commands/current';
@@ -19,6 +19,7 @@ import { runDoctorCommand } from './commands/doctor';
 import { runExportCommand } from './commands/export';
 import { runImportCommand } from './commands/import';
 import { runEditCommand } from './commands/edit';
+import { input, select } from '@inquirer/prompts';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -47,17 +48,52 @@ await yargs(hideBin(process.argv))
         .option('gpg-key', { type: 'string' })
         .option('signing', { type: 'boolean', default: false }),
     async (argv: any) => {
-      process.exitCode = await runAddCommand({
-        name: argv.name,
-        displayName: argv.displayName,
-        email: argv.email,
-        sshKey: argv.sshKey,
-        generateSsh: argv.generateSsh,
-        gpgKey: argv.gpgKey,
-        signing: argv.signing,
-        noInteractive: argv.noInteractive,
-        json: argv.json,
+      argv.authMethod = await select({
+        message: 'Add Profile using:',
+        choices: [
+          {
+            name: 'Secure Shell (SSH)',
+            value: 'ssh',
+          },
+          {
+            name: 'Personal Access Token (PAT)',
+            value: 'pat',
+          },
+        ],
+        theme: {
+          style: {
+            keysHelpTip: () => undefined,
+          },
+        },
       });
+
+      if (argv.authMethod === 'ssh')
+        process.exitCode = await runSshAddCommand({
+          name: argv.name,
+          displayName: argv.displayName,
+          email: argv.email,
+          sshKey: argv.sshKey,
+          generateSsh: argv.generateSsh,
+          gpgKey: argv.gpgKey,
+          signing: argv.signing,
+          authMethod: argv.authMethod,
+          noInteractive: argv.noInteractive,
+          json: argv.json,
+        });
+      else {
+        argv.pat = await input({ message: 'Enter Personal Access Token:' });
+        process.exitCode = await runPatAddCommand({
+          name: argv.name,
+          displayName: argv.displayName,
+          email: argv.email,
+          pat: argv.pat,
+          gpgKey: argv.gpgKey,
+          signing: argv.signing,
+          authMethod: argv.authMethod,
+          noInteractive: argv.noInteractive,
+          json: argv.json,
+        });
+      }
     }
   )
   .command(
