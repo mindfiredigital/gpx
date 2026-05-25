@@ -7,7 +7,7 @@ import type { AddArgs } from '../lib/types/AddCommand.type';
 import { generateSshKeyForProfile } from '../core/sshConfigManagement/generateSshKey';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 
-export const runAddCommand = async (args: AddArgs): Promise<number> => {
+const runSshAddCommand = async (args: AddArgs): Promise<number> => {
   try {
     const nameValidation = validateProfileName(args.name);
     if (!nameValidation.valid) {
@@ -59,6 +59,7 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
       email,
       ssh_key: sshKeyPath,
       gpg_key: args.gpgKey || undefined,
+      auth_method: args.authMethod,
       signing_commits: args.signing ?? false,
       created_at: new Date().toISOString(),
     };
@@ -93,3 +94,16 @@ export const runAddCommand = async (args: AddArgs): Promise<number> => {
     return handleCommandError(error);
   }
 };
+
+const runPatAddCommand = async (args: AddArgs) => {
+  try {
+    printHuman(`Trying to add profile using PAT`);
+    printHuman(`Pat from the add command - ${args.pat}`);
+    printHuman(`Profile added using PAT (demo)`);
+    return 0;
+  } catch (error) {
+    return handleCommandError(error);
+  }
+};
+
+export { runSshAddCommand, runPatAddCommand };

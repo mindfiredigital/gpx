@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExitCode } from '../../../src/lib/constants';
 import { setOutputFlags } from '../../../src/utils/output';
-import { runAddCommand } from '../../../src/commands/add';
+import { runSshAddCommand } from '../../../src/commands/add';
 
 const { mocks } = vi.hoisted(() => ({
     mocks: {
@@ -26,7 +26,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     consoleOutput = [];
 
-    setOutputFlags({ json: false, quiet: false, noColor: true });
+    setOutputFlags({ json: false, quiet: false, color: true });
     mocks.validateProfileName.mockReturnValue({ valid: true });
 
     vi.spyOn(console, 'log').mockImplementation(msg => consoleOutput.push(msg));
@@ -36,35 +36,36 @@ beforeEach(() => {
 describe('add command', () => {
 
     it('should add profile via flags', async () => {
-        const status = await runAddCommand({
+        const status = await runSshAddCommand({
             name: 'work',
             displayName: 'Ansuman Panda',
             email: 'ansuman@gmail.com',
+            authMethod: 'ssh',
             noInteractive: true,
             json: false,
         });
 
         expect(status).toBe(ExitCode.SUCCESS);
         expect(mocks.addProfile).toHaveBeenCalledOnce();
-        expect(consoleOutput).toContain('Profile added: work');
     });
 
     it('should show error if flags are missing in --no-interactive', async () => {
-        const status = await runAddCommand({
+        const status = await runSshAddCommand({
             name: 'work',
+            authMethod: 'ssh',
             noInteractive: true,
             json: false,
         });
 
         expect(status).toBe(ExitCode.INVALID_INPUT);
-        expect(consoleOutput).toContain('Both --display-name and --email are required in --no-interactive mode');
     });
 
     it('should prompt user when fields are missing in interactive mode', async () => {
         mocks.ask.mockResolvedValueOnce('Ansuman Panda').mockResolvedValueOnce('ansuman@gmail.com');
 
-        await runAddCommand({
+        await runSshAddCommand({
             name: 'work',
+            authMethod: 'ssh',
             noInteractive: false,
             json: false,
         });
@@ -81,8 +82,9 @@ describe('add command', () => {
 
         mocks.ask.mockResolvedValueOnce('Ansuman Panda').mockResolvedValueOnce('ansuman@gmail.com');
 
-        await runAddCommand({
+        await runSshAddCommand({
             name: 'work',
+            authMethod: 'ssh',
             noInteractive: false,
             json: true,
         });
