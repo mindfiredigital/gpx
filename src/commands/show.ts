@@ -57,6 +57,7 @@ export const runShowCommand = async (profileName: string, json: boolean): Promis
     humanOutputData.push(
       `GPG key: ${profile.gpg_key ?? 'not set'}`,
       `Signing commits: ${profile.signing_commits ? 'enabled' : 'disabled'}`,
+      `Authentication Method: ${profile.auth_method}`,
       `Created at: ${profile.created_at}`,
       `Last used at: ${profile.last_used_at ?? 'never'}`,
       `Active: ${active === profile.name ? 'yes' : 'no'}`
