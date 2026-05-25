@@ -7,6 +7,7 @@ export interface Profile {
   created_at: string;
   ssh_public_key?: string;
   gpg_key?: string;
+  auth_method: 'ssh' | 'pat';
   last_used_at?: string;
 }
 

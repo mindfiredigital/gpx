@@ -29,6 +29,7 @@ export const runShowCommand = async (profileName: string, json: boolean): Promis
       `SSH key: ${profile.ssh_key ?? 'not set'}`,
       `GPG key: ${profile.gpg_key ?? 'not set'}`,
       `Signing commits: ${profile.signing_commits ? 'enabled' : 'disabled'}`,
+      `Authentication Method: ${profile.auth_method}`,
       `Created at: ${profile.created_at}`,
       `Last used at: ${profile.last_used_at ?? 'never'}`,
       `Active: ${payload.active ? 'yes' : 'no'}`,

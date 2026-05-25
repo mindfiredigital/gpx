@@ -29,6 +29,7 @@ export const runExportCommand = async (
         ssh_key: profile.ssh_key,
         gpg_key: profile.gpg_key,
         signing_commits: profile.signing_commits,
+        auth_method: profile.auth_method,
         created_at: profile.created_at,
         last_used_at: profile.last_used_at,
       };

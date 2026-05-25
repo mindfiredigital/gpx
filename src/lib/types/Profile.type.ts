@@ -7,6 +7,7 @@ interface Profile {
   host_pattern?: string;
   default_branch?: string;
   signing_commits?: boolean;
+  auth_method: 'ssh' | 'pat';
   created_at: string;
   last_used_at?: string;
 }
