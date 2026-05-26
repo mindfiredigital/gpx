@@ -113,18 +113,7 @@ await yargs(hideBin(process.argv))
     }
   )
   .command(
-    'remove <name>',
-    'Remove a profile',
-    (builder: any) =>
-      builder
-        .positional('name', { type: 'string', demandOption: true })
-        .option('force', { type: 'boolean', default: false }),
-    async (argv: any) => {
-      process.exitCode = await runRemoveCommand(argv.name, argv.force, argv.json);
-    }
-  )
-  .command(
-    'rm <name>',
+    ['remove <name>', 'rm <name>'],
     'Remove a profile',
     (builder: any) =>
       builder
