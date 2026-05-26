@@ -78,7 +78,7 @@ export const runDoctorCommand = async (
         printCheck(check);
       }
       printHuman(
-        `\n${fmt.green(`${passCount} passed`)}, ${fmt.yellow(`${warnCount} warnings`)}, ${fmt.red(`${failCount} failed`)}`
+        `\n${fmt.green(`${passCount} passed`)}${warnCount > 0 || failCount > 0 ? ', ' : ''}${warnCount > 0 ? fmt.yellow(`${warnCount} warnings${failCount > 0 ? ', ' : ''}`) : ''}${failCount > 0 ? fmt.red(`${failCount} failed`) : ''}`
       );
     }
 
