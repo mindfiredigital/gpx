@@ -32,6 +32,10 @@ const DEVICE_CODE_URL = 'https://github.com/login/device/code';
 const TOKEN_URL = 'https://github.com/login/oauth/access_token';
 const API_BASE = 'https://api.github.com';
 
+
+const PLATFORM = os.platform();
+const SERVICE = 'gpx';
+
 export {
   ExitCode,
   HOME_DIR,
@@ -49,4 +53,6 @@ export {
   API_BASE,
   CONFIG_DIR,
   CONFIG_FILE,
+  PLATFORM,
+  SERVICE
 };
