@@ -1,39 +1,42 @@
-interface GitHubUser {
-    login: string;
-}
-
-interface PatValidationResult {
-    login: string;
-}
+import { API_BASE } from "../../lib/constants";
+import type { PatValidationResult, GitHubUser, GitHubEmail } from "../../lib/types/ValidatePat.type";
 
 export const validatePat = async (pat: string): Promise<PatValidationResult> => {
-    const response = await fetch('https://api.github.com/user', {
-        headers: {
-            Authorization: `Bearer ${pat}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-        },
-    });
+  const headers = {
+    Authorization: `Bearer ${pat}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
 
-    if (response.status === 401) {
-        throw new Error('Invalid PAT. Please try again with a different PAT.');
-    }
+  const userResponse = await fetch(`${API_BASE}/user`, { headers });
 
-    if (response.status === 403) {
-        throw new Error('PAT does not have required permissions.');
-    }
+  if (userResponse.status === 401) {
+    throw new Error('Invalid PAT. Please check the token and try again.');
+  }
+  if (userResponse.status === 403) {
+    throw new Error('PAT does not have the required permissions.');
+  }
+  if (!userResponse.ok) {
+    throw new Error(`GitHub API error: ${userResponse.statusText}`);
+  }
 
-    if (!response.ok) {
-        throw new Error(`error: ${response.statusText}`);
-    }
+  const user = (await userResponse.json()) as GitHubUser;
+  if (!user.login) {
+    throw new Error('Could not retrieve account information from GitHub.');
+  }
 
-    const user = (await response.json()) as GitHubUser;
+  const emailsResponse = await fetch('https://api.github.com/user/emails', { headers });
 
-    if (!user.login) {
-        throw new Error('Could not get account information.');
-    }
+  let primaryEmail = '';
+  if (emailsResponse.ok) {
+    const emails = (await emailsResponse.json()) as GitHubEmail[];
+    const primary = emails.find((e) => e.primary && e.verified);
+    primaryEmail = primary?.email ?? emails[0]?.email ?? 'no email received';
+  }
 
-    return {
-        login: user.login,
-    };
+  return {
+    login: user.login,
+    display_name: user.name ?? user.login,
+    email: primaryEmail,
+  };
 };
