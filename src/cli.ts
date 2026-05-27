@@ -19,7 +19,10 @@ import { runDoctorCommand } from './commands/doctor';
 import { runExportCommand } from './commands/export';
 import { runImportCommand } from './commands/import';
 import { runEditCommand } from './commands/edit';
-import { input, select } from '@inquirer/prompts';
+import { runPatSetCommand, runPatClearCommand } from './commands/pat';
+import { runGitCredentialCommand } from './core/credentialManagement/gpxCredentialHelper';
+import { password, select } from '@inquirer/prompts';
+import { PLATFORM } from './lib/constants';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -46,28 +49,30 @@ await yargs(hideBin(process.argv))
         .option('ssh-key', { type: 'string' })
         .option('generate-ssh', { type: 'boolean', default: false })
         .option('gpg-key', { type: 'string' })
-        .option('signing', { type: 'boolean', default: false }),
+        .option('signing', { type: 'boolean', default: false })
+        .option('auth-method', { type: 'string', choices: ['ssh', 'pat'] })
+        .option('pat', { type: 'string' }),
     async (argv: any) => {
-      argv.authMethod = await select({
-        message: 'Add Profile using:',
-        choices: [
-          {
-            name: 'Secure Shell (SSH)',
-            value: 'ssh',
+      // Skip select() if --auth-method was provided via flag
+      if (!argv.authMethod) {
+        const authChoices: { name: string; value: string }[] = [
+          { name: 'Secure Shell (SSH)', value: 'ssh' },
+        ];
+        if (PLATFORM !== 'win32') {
+          authChoices.push({ name: 'Personal Access Token (PAT)', value: 'pat' });
+        }
+        argv.authMethod = await select({
+          message: 'Add Profile using:',
+          choices: authChoices,
+          theme: {
+            style: {
+              keysHelpTip: () => undefined,
+            },
           },
-          {
-            name: 'Personal Access Token (PAT)',
-            value: 'pat',
-          },
-        ],
-        theme: {
-          style: {
-            keysHelpTip: () => undefined,
-          },
-        },
-      });
+        });
+      }
 
-      if (argv.authMethod === 'ssh')
+      if (argv.authMethod === 'ssh') {
         process.exitCode = await runSshAddCommand({
           name: argv.name,
           displayName: argv.displayName,
@@ -80,8 +85,11 @@ await yargs(hideBin(process.argv))
           noInteractive: argv.noInteractive,
           json: argv.json,
         });
-      else {
-        argv.pat = await input({ message: 'Enter Personal Access Token:' });
+      } else {
+        // Skip password() prompt if --pat flag was provided directly
+        if (!argv.pat) {
+          argv.pat = await password({ message: 'Enter Personal Access Token:' });
+        }
         process.exitCode = await runPatAddCommand({
           name: argv.name,
           displayName: argv.displayName,
@@ -257,6 +265,43 @@ await yargs(hideBin(process.argv))
         },
         argv.json
       );
+    }
+  )
+  .command('pat', 'Manage PAT for a profile', (builder: any) =>
+    builder
+      .command(
+        'set <profile>',
+        'Set or rotate PAT for a profile',
+        (b: any) =>
+          b
+            .positional('profile', { type: 'string', demandOption: true })
+            .option('pat', { type: 'string' }),
+        async (argv: any) => {
+          process.exitCode = await runPatSetCommand(argv.profile, argv.pat, argv.json);
+        }
+      )
+      .command(
+        'clear <profile>',
+        'Remove stored PAT for a profile',
+        (b: any) => b.positional('profile', { type: 'string', demandOption: true }),
+        async (argv: any) => {
+          process.exitCode = await runPatClearCommand(argv.profile, argv.json);
+        }
+      )
+      .demandCommand(1, 'Use: gpx pat set <profile> | gpx pat clear <profile>')
+  )
+  // Internal command invoked by git credential helper - not shown in help
+  .command(
+    'git-credential <action>',
+    false,
+    (builder: any) =>
+      builder.positional('action', {
+        type: 'string',
+        choices: ['get', 'store', 'erase'],
+        demandOption: true,
+      }),
+    async (argv: any) => {
+      await runGitCredentialCommand(argv.action);
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')
