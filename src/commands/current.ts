@@ -6,6 +6,7 @@ import {
   hasIdentity,
   findProfileNameByIdentity,
 } from '../core/gitconfig';
+import { getProfile } from '../core/profileManagement/profiles';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printHuman, printJson } from '../utils/output';
 import type { GitIdentity } from '../lib/types/GpxConfig.type';
@@ -31,10 +32,14 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
     const activeScope: ActiveProfileScope = localProfileName ? 'local' : 'global';
     const activeProfile = activeScope === 'local' ? localProfileName : globalProfileName;
 
+    const currentProfileData = activeProfile ? getProfile(activeProfile) : null;
+    const authMethod = currentProfileData?.auth_method ?? null;
+
     const payload = {
       active: {
         profile: activeProfile,
         scope: activeScope,
+        auth_method: authMethod,
       },
       global: {
         profile: globalProfileName,
@@ -42,9 +47,9 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
       },
       local: localIdentity
         ? {
-            profile: localProfileName,
-            ...localIdentity,
-          }
+          profile: localProfileName,
+          ...localIdentity,
+        }
         : null,
     };
 
@@ -55,6 +60,8 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
 
     printHuman(`Active profile: ${activeProfile ?? 'none'}`);
     printHuman(`Scope: ${activeScope}`);
+    if (authMethod)
+      printHuman(`Auth method: ${authMethod}`);
     printHuman(`Global name: ${globalIdentity.name ?? 'not set'}`);
     printHuman(`Global email: ${globalIdentity.email ?? 'not set'}`);
 
