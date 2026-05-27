@@ -9,6 +9,7 @@ import { checkSshAgent } from '../utils/doctorCommandChecks/checkSshAgent';
 import { checkSshKey } from '../utils/doctorCommandChecks/checkSshKey';
 import { checkGpgKey } from '../utils/doctorCommandChecks/checkGpgKey';
 import { checkRepoRemoteMatch } from '../utils/doctorCommandChecks/checkRepoRemoteMatch';
+import { checkPatAuth } from '../utils/doctorCommandChecks/checkPatAuth';
 
 const printCheck = (check: CheckResult): void => {
   let icon: string, colorFn;
@@ -35,7 +36,6 @@ export const runDoctorCommand = async (
 
     checks.push(checkGitInstalled());
     checks.push(checkGitIdentity());
-    checks.push(checkSshAgent());
 
     if (profileName) {
       const profile = getProfile(profileName);
@@ -43,14 +43,28 @@ export const runDoctorCommand = async (
         throw new ProfileError(`Profile not found: ${profileName}`, ExitCode.PROFILE_NOT_FOUND);
       }
 
-      checks.push(checkSshKey(profile));
-      checks.push(checkGpgKey(profile));
-      checks.push(checkRepoRemoteMatch(profile));
+      if (profile.auth_method === 'pat') {
+        const patChecks = await checkPatAuth(profile);
+        checks.push(...patChecks);
+        checks.push(checkGpgKey(profile));
+        checks.push(checkRepoRemoteMatch(profile));
+      } else {
+        checks.push(checkSshAgent());
+        checks.push(checkSshKey(profile));
+        checks.push(checkGpgKey(profile));
+        checks.push(checkRepoRemoteMatch(profile));
+      }
     } else {
+      checks.push(checkSshAgent());
       const profiles = listProfiles();
 
       for (const profile of profiles) {
-        checks.push(checkSshKey(profile));
+        if (profile.auth_method === 'pat') {
+          const patChecks = await checkPatAuth(profile);
+          checks.push(...patChecks);
+        } else {
+          checks.push(checkSshKey(profile));
+        }
         checks.push(checkGpgKey(profile));
       }
     }
