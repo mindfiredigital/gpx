@@ -210,6 +210,19 @@ const updateRemoteForProfile = (
   return result;
 };
 
+const sshAliasToHttps = (url: string): string | null => {
+  const match = url.match(/^git@github\.com-[^:]+:([^/]+\/[^.]+(?:\.git)?)$/);
+  if (!match || !match[1]) return null;
+  const repoPath = match[1].endsWith('.git') ? match[1] : `${match[1]}.git`;
+  return `https://github.com/${repoPath}`;
+};
+
+const httpsToSshAlias = (url: string, profileName: string): string | null => {
+  const match = url.match(/^https:\/\/github\.com\/([^/]+\/[^/]+?)(\.git)?$/);
+  if (!match || !match[1]) return null;
+  return `git@github.com-${profileName}:${match[1]}.git`;
+};
+
 export {
   safeGet,
   ensureGitInstalled,
@@ -227,4 +240,6 @@ export {
   getGpxProfileFromRemote,
   isHttpsRemote,
   updateRemoteForProfile,
+  sshAliasToHttps,
+  httpsToSshAlias,
 };
