@@ -47,9 +47,9 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
       },
       local: localIdentity
         ? {
-            profile: localProfileName,
-            ...localIdentity,
-          }
+          profile: localProfileName,
+          ...localIdentity,
+        }
         : null,
     };
 
