@@ -55,6 +55,7 @@ export const runDoctorCommand = async (
         checks.push(checkRepoRemoteMatch(profile));
       }
     } else {
+      checks.push(checkSshAgent());
       const profiles = listProfiles();
       const hasSshProfile = profiles.some((p) => p.auth_method === 'ssh');
 
