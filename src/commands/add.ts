@@ -6,6 +6,10 @@ import { ProfileError } from '../core/profileManagement/errorClass';
 import type { AddArgs } from '../lib/types/AddCommand.type';
 import { generateSshKeyForProfile } from '../core/sshConfigManagement/generateSshKey';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
+import { validatePat } from '../core/githubManagement/validatePat';
+import { storePatForProfile } from '../core/credentialManagement/credentialStore';
+import { ensureCredentialHelperAdded } from '../core/credentialManagement/ensureHelper';
+import { PLATFORM } from '../lib/constants';
 
 const runSshAddCommand = async (args: AddArgs): Promise<number> => {
   try {
@@ -95,12 +99,85 @@ const runSshAddCommand = async (args: AddArgs): Promise<number> => {
   }
 };
 
-const runPatAddCommand = async (args: AddArgs) => {
+const runPatAddCommand = async (args: AddArgs): Promise<number> => {
   try {
-    printHuman(`Trying to add profile using PAT`);
-    printHuman(`Pat from the add command - ${args.pat}`);
-    printHuman(`Profile added using PAT (demo)`);
-    return 0;
+    if (PLATFORM === 'win32') {
+      throw new ProfileError(
+        'PAT authentication is not supported on Windows.',
+        ExitCode.INVALID_INPUT
+      );
+    }
+
+    // Validate profile name
+    const nameValidation = validateProfileName(args.name);
+    if (!nameValidation.valid) {
+      throw new ProfileError(
+        nameValidation.reason ?? 'Invalid profile name',
+        ExitCode.INVALID_INPUT
+      );
+    }
+
+    if (!args.pat) {
+      throw new ProfileError('PAT is required for PAT-based profiles.', ExitCode.INVALID_INPUT);
+    }
+
+    printHuman('Validating PAT with GitHub...');
+    let identity: { login: string; display_name: string; email: string };
+    try {
+      identity = await validatePat(args.pat);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'PAT validation failed';
+      throw new ProfileError(message, ExitCode.INVALID_INPUT);
+    }
+
+    if (!args.noInteractive) {
+      const confirm = await ask(
+        `Found: ${identity.display_name} <${identity.email}> (login: ${identity.login})\nUse this identity? [Y/n]: `
+      );
+      if (confirm.toLowerCase() === 'n') {
+        printHuman('Aborted.');
+        return ExitCode.SUCCESS;
+      }
+    }
+
+    const profileToAdd = {
+      name: args.name,
+      display_name: identity.display_name,
+      email: identity.email,
+      auth_method: 'pat' as const,
+      github_login: identity.login,
+      gpg_key: args.gpgKey || undefined,
+      signing_commits: args.signing ?? false,
+      created_at: new Date().toISOString(),
+    };
+
+    await addProfile(profileToAdd);
+
+    await storePatForProfile(args.name, args.pat);
+
+    ensureCredentialHelperAdded();
+
+    args.pat = '';
+
+    const payload = {
+      profile: {
+        name: profileToAdd.name,
+        display_name: profileToAdd.display_name,
+        email: profileToAdd.email,
+        github_login: profileToAdd.github_login,
+        auth_method: profileToAdd.auth_method,
+      },
+    };
+
+    if (args.json) {
+      printJson({ success: true, data: payload });
+    } else {
+      printSuccess(`Profile added: ${args.name} (PAT / HTTPS)`);
+      printHuman(`\nTo start using this profile:`);
+      printHuman(`  gpx use ${args.name}`);
+    }
+
+    return ExitCode.SUCCESS;
   } catch (error) {
     return handleCommandError(error);
   }
