@@ -1,8 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { getProfile } from '../core/profileManagement/profiles';
-import { ExitCode } from '../lib/constants';
+import { loadActive, saveActive } from '../core/profileManagement/activeStore';
+import { ExitCode, PLATFORM } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
+import { ensureCredentialHelperAdded } from '../core/credentialManagement/ensureHelper';
 
 export async function runRunCommand(
   profileName: string,
@@ -37,15 +39,37 @@ export async function runRunCommand(
       env['GIT_COMMITTER_SIGNINGKEY'] = profile.gpg_key;
     }
 
+    let prevActive: Awaited<ReturnType<typeof loadActive>> | null = null;
+    const isPat = profile.auth_method === 'pat' && PLATFORM !== 'win32';
+
+    if (isPat) {
+      ensureCredentialHelperAdded();
+      prevActive = loadActive();
+      await saveActive({ global: profileName, switched_at: new Date().toISOString() });
+
+      const restoreProfile = () => {
+        if (prevActive !== null) saveActive(prevActive);
+        process.exit(1);
+      };
+      process.once('SIGTERM', restoreProfile);
+      process.once('SIGINT', restoreProfile);
+    }
+
     const command = commandArgs[0] as string;
     const args = commandArgs.slice(1);
 
-    const result = spawnSync(command, args, {
-      stdio: 'inherit',
-      env: env,
-    });
-
-    const exitCode = result.status ?? 1;
+    let exitCode: number;
+    try {
+      const result = spawnSync(command, args, {
+        stdio: 'inherit',
+        env,
+      });
+      exitCode = result.status ?? 1;
+    } finally {
+      if (isPat && prevActive !== null) {
+        await saveActive(prevActive);
+      }
+    }
 
     if (json) {
       printJson({
