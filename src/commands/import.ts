@@ -34,6 +34,7 @@ export const runImportCommand = async (
       imported: [] as string[],
       skipped: [] as string[],
       failed: [] as { name: string; reason: string }[],
+      patProfiles: [] as string[],
     };
 
     for (const entry of importProfiles) {
@@ -81,6 +82,9 @@ export const runImportCommand = async (
       try {
         await addProfile(profile);
         results.imported.push(name);
+        if (profile.auth_method === 'pat') {
+          results.patProfiles.push(name);
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         results.failed.push({ name, reason: message });
@@ -101,6 +105,13 @@ export const runImportCommand = async (
       }
       for (const fail of results.failed) {
         printError(`✗ Failed: ${fail.name} - ${fail.reason}`);
+      }
+
+      if (results.patProfiles.length > 0) {
+        printWarn(`\n⚠  PAT profiles imported (token not included in export):`);
+        for (const name of results.patProfiles) {
+          printWarn(`Run: gpx pat set ${name}`);
+        }
       }
 
       const total = results.imported.length + results.skipped.length + results.failed.length;
