@@ -42,15 +42,16 @@ export async function runRunCommand(
     let prevActive: Awaited<ReturnType<typeof loadActive>> | null = null;
     const isPat = profile.auth_method === 'pat' && PLATFORM !== 'win32';
 
+    const restoreProfile = () => {
+      if (prevActive !== null) saveActive(prevActive);
+      process.exit(1);
+    };
+
     if (isPat) {
       ensureCredentialHelperAdded();
       prevActive = loadActive();
       await saveActive({ global: profileName, switched_at: new Date().toISOString() });
 
-      const restoreProfile = () => {
-        if (prevActive !== null) saveActive(prevActive);
-        process.exit(1);
-      };
       process.once('SIGTERM', restoreProfile);
       process.once('SIGINT', restoreProfile);
     }
@@ -66,8 +67,12 @@ export async function runRunCommand(
       });
       exitCode = result.status ?? 1;
     } finally {
-      if (isPat && prevActive !== null) {
-        await saveActive(prevActive);
+      if (isPat) {
+        process.off('SIGTERM', restoreProfile);
+        process.off('SIGINT', restoreProfile);
+        if (prevActive !== null) {
+          await saveActive(prevActive);
+        }
       }
     }
 
