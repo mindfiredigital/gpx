@@ -50,7 +50,7 @@ const mockProfiles = [
 beforeEach(() => {
     vi.clearAllMocks();
     consoleOutput = [];
-    setOutputFlags({ json: false, noColor: false, quiet: false });
+    setOutputFlags({ json: false, color: false, quiet: false });
     mocks.listProfiles.mockReturnValue(mockProfiles);
     vi.spyOn(console, 'log').mockImplementation((message) => consoleOutput.push(message));
     vi.spyOn(console, 'error').mockImplementation((message) => consoleOutput.push(message));
@@ -103,5 +103,42 @@ describe('export command', () => {
         expect(code).toBe(ExitCode.SUCCESS);
         const output = consoleOutput[0] as string;
         expect(output).toBe('No profiles to export');
-    })
-})
+    });
+
+    it('should handle no profile export attempt in json mode', async () => {
+        mocks.listProfiles.mockReturnValue([]);
+        const code = await runExportCommand(false, 'exportPath', true);
+
+        expect(code).toBe(ExitCode.SUCCESS);
+        const output = JSON.parse(consoleOutput[0] as string);
+        expect(output.success).toBe(true);
+        expect(output.data.profiles).toEqual([]);
+    });
+
+    it('should set ssh_public_key to null if pub key file does not exist', async () => {
+        mocks.existsSync.mockReturnValue(false);
+        const code = await runExportCommand(true, 'exportPath', false);
+
+        expect(code).toBe(ExitCode.SUCCESS);
+        const [, content] = mocks.writeFileSync.mock.calls[0]!;
+        const output = JSON.parse(content);
+        expect(output.profiles[0].ssh_public_key).toBeNull();
+    });
+
+    it('should output JSON to stdout if exportPath is not provided and json is true', async () => {
+        const code = await runExportCommand(false, '', true);
+
+        expect(code).toBe(ExitCode.SUCCESS);
+        const output = JSON.parse(consoleOutput[0] as string);
+        expect(output.data.profiles).toHaveLength(2);
+    });
+
+    it('should handle errors gracefully in catch block', async () => {
+        mocks.listProfiles.mockImplementation(() => {
+            throw new Error('List profiles failed');
+        });
+        const code = await runExportCommand(false, 'exportPath', false);
+
+        expect(code).toBe(ExitCode.PROFILE_NOT_FOUND);
+    });
+});
