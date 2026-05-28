@@ -1,10 +1,15 @@
 import type { CheckResult } from '../../lib/types/CheckResult.type';
-import { safeGet } from '../../core/gitconfig';
+import { spawnSync } from 'node:child_process';
 
 export const checkSshAgent = (): CheckResult => {
-  const output = safeGet('ssh-add -l 2>&1');
+  const result = spawnSync('ssh-add', ['-l'], { encoding: 'utf-8' });
+  const output = (result.stdout || '') + (result.stderr || '');
 
-  if (output === null) {
+  if (
+    result.status !== 0 &&
+    !output.includes('The agent has no identities') &&
+    !output.includes('Could not open a connection')
+  ) {
     return {
       label: 'SSH agent',
       status: 'fail',

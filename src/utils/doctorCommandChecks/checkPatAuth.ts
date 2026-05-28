@@ -1,10 +1,8 @@
 import type { CheckResult } from '../../lib/types/CheckResult.type';
 import type { Profile } from '../../lib/types/Profile.type';
 import { hasPatForProfile } from '../../core/credentialManagement/credentialStore';
-import { PLATFORM } from '../../lib/constants';
+import { PLATFORM, GPX_CREDENTIAL_HELPER } from '../../lib/constants';
 import { spawnSync } from 'node:child_process';
-
-const GPX_CREDENTIAL_HELPER = 'gpx git-credential';
 
 export const checkPatAuth = async (profile: Profile): Promise<CheckResult[]> => {
   const results: CheckResult[] = [];
@@ -27,9 +25,15 @@ export const checkPatAuth = async (profile: Profile): Promise<CheckResult[]> => 
       : `No PAT found. Run: gpx pat set ${profile.name}`,
   });
 
-  let helperInstalled = false;
+  let helperInstalled: boolean | undefined;
   try {
-    const helpers = spawnSync('git', ['config', '--global', '--get-all', 'credential.helper']).stdout.toString()
+    const helpers = spawnSync('git', [
+      'config',
+      '--global',
+      '--get-all',
+      'credential.https://github.com.helper',
+    ])
+      .stdout.toString()
       .trim()
       .split('\n')
       .map((item) => item.trim());
@@ -42,8 +46,8 @@ export const checkPatAuth = async (profile: Profile): Promise<CheckResult[]> => 
     label: `Git credential helper [${profile.name}]`,
     status: helperInstalled ? 'pass' : 'warn',
     message: helperInstalled
-      ? `credential.helper = "${GPX_CREDENTIAL_HELPER}"`
-      : `gpx credential helper not registered. Run: gpx use ${profile.name}`,
+      ? `credential.https://github.com.helper = "${GPX_CREDENTIAL_HELPER}"`
+      : `gpx credential helper not registered for GitHub. Run: gpx use ${profile.name}`,
   });
 
   return results;
