@@ -9,7 +9,7 @@ import {
   updateRemoteForProfile,
   sshAliasToHttps,
   httpsToSshAlias,
-  safeGet,
+  safeGit,
 } from '../core/gitconfig';
 import { ExitCode, PLATFORM } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess, printWarn } from '../utils/output';
@@ -50,7 +50,7 @@ export const runUseCommand = async (
     // Always apply git identity (user.name / user.email / gpg)
     applyProfileToGitConfig(profile, scope);
 
-    const authMethod = profile.auth_method ?? 'ssh';
+    const authMethod = profile.auth_method;
 
     if (authMethod === 'ssh') {
       if (profile.ssh_key) {
@@ -67,7 +67,7 @@ export const runUseCommand = async (
         }
       }
 
-      if (isInsideGitRepo()) {
+      if (local && isInsideGitRepo()) {
         const result = updateRemoteForProfile(profile.name, scope);
         remoteUpdates.push(...result.updated);
 
@@ -100,8 +100,8 @@ export const runUseCommand = async (
 
       ensureCredentialHelperAdded();
 
-      if (isInsideGitRepo()) {
-        const remotesRaw = safeGet('git remote');
+      if (local && isInsideGitRepo()) {
+        const remotesRaw = safeGit(['remote']);
         const remotes = remotesRaw ? remotesRaw.split('\n').filter(Boolean) : [];
 
         for (const remote of remotes) {
