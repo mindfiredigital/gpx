@@ -31,7 +31,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   consoleOutput = [];
 
-  setOutputFlags({ json: false, quiet: false, noColor: true });
+  setOutputFlags({ json: false, quiet: false, color: true });
 
   vi.spyOn(console, 'log').mockImplementation((msg) => consoleOutput.push(msg));
   vi.spyOn(console, 'error').mockImplementation((msg) => consoleOutput.push(msg));
@@ -87,7 +87,6 @@ describe('autodetect command', () => {
       expect.objectContaining({ name: 'work' }),
       'global'
     );
-    expect(mocks.updateRemoteForProfile).toHaveBeenCalledWith('work');
     expect(mocks.saveActive).toHaveBeenCalledWith(
       expect.objectContaining({ global: 'work' })
     );

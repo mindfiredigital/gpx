@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   consoleOutput = [];
 
-  setOutputFlags({ json: false, quiet: false, noColor: true });
+  setOutputFlags({ json: false, quiet: false, color: true });
 
   mocks.loadConfig.mockReturnValue({
     auto_detect: false,
@@ -34,7 +34,7 @@ beforeEach(() => {
 });
 
 describe('config get command', () => {
-  it('should return JSON output', async () => {
+  it('should return JSON output when json flag is used', async () => {
     const code = await runConfigGetCommand(true);
 
     expect(code).toBe(ExitCode.SUCCESS);
@@ -44,10 +44,25 @@ describe('config get command', () => {
       data: { auto_detect: false },
     });
   });
+
+  it('should return human-readable output when json flag is not used', async () => {
+    const code = await runConfigGetCommand(false);
+    expect(code).toBe(ExitCode.SUCCESS);
+    expect(consoleOutput[0]).toContain('false');
+  });
+
+  it('should return human-readable green true if config auto_detect is true', async () => {
+    mocks.loadConfig.mockReturnValue({
+      auto_detect: true
+    });
+    const code = await runConfigGetCommand(false);
+    expect(code).toBe(ExitCode.SUCCESS);
+    expect(consoleOutput[0]).toContain('true');
+  });
 });
 
 describe('config set command', () => {
-  it('should return JSON output', async () => {
+  it('should return JSON output when json flag is true', async () => {
     const code = await runConfigSetCommand(true, true);
 
     expect(code).toBe(ExitCode.SUCCESS);

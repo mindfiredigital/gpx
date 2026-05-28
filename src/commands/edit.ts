@@ -16,6 +16,7 @@ export const runEditCommand = async (
     sshKey?: string;
     gpgKey?: string;
     signing?: boolean;
+    githubUsername?: string;
   },
   json: boolean
 ): Promise<number> => {
@@ -30,12 +31,27 @@ export const runEditCommand = async (
       !options.email &&
       !options.sshKey &&
       !options.gpgKey &&
-      options.signing === undefined
+      options.signing === undefined &&
+      !options.githubUsername
     )
       throw new ProfileError(
         `Use: gpx edit --help \nEnter atleast one valid flag`,
         ExitCode.INVALID_INPUT
       );
+
+    const authMethod = profile.auth_method;
+    if (authMethod === 'pat') {
+      if (options.sshKey !== undefined) {
+        throw new ProfileError('SSH key cannot be set on a PAT profile.', ExitCode.INVALID_INPUT);
+      }
+    } else if (authMethod === 'ssh') {
+      if (options.githubUsername !== undefined) {
+        throw new ProfileError(
+          'GitHub username cannot be set on an SSH profile.',
+          ExitCode.INVALID_INPUT
+        );
+      }
+    }
 
     const updateProfileData: Partial<Profile> = {};
     const changes: string[] = [];
@@ -67,6 +83,11 @@ export const runEditCommand = async (
     if (options.signing !== undefined) {
       updateProfileData.signing_commits = options.signing;
       changes.push(`signing_commits -> ${options.signing}`);
+    }
+
+    if (options.githubUsername !== undefined) {
+      updateProfileData.github_username = options.githubUsername;
+      changes.push(`github_username -> ${options.githubUsername}`);
     }
 
     await updateProfile(profileName, updateProfileData);
