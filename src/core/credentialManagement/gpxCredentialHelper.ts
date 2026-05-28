@@ -51,7 +51,10 @@ export const runGitCredentialCommand = async (action: string): Promise<void> => 
   const pat = await getPatForProfile(profileName);
   if (!pat) return;
 
-  const login = profile.github_login || profile.display_name;
-
-  process.stdout.write(`username=${login}\npassword=${pat}\n\n`);
+  const username = profile.github_username;
+  if (username) {
+    process.stdout.write(`username=${username}\npassword=${pat}\n\n`);
+  } else {
+    process.stdout.write(`password=${pat}\n\n`);
+  }
 };
