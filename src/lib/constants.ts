@@ -29,7 +29,7 @@ const CONFIG_FILE: string = path.join(CONFIG_DIR, 'config.json');
 const API_BASE = 'https://api.github.com';
 const PLATFORM = os.platform();
 const SERVICE = 'gpx';
-const GPX_CREDENTIAL_HELPER = 'gpx git-credential';
+const GPX_CREDENTIAL_HELPER = '!gpx git-credential';
 
 export {
   ExitCode,
@@ -47,5 +47,5 @@ export {
   CONFIG_FILE,
   PLATFORM,
   SERVICE,
-  GPX_CREDENTIAL_HELPER
+  GPX_CREDENTIAL_HELPER,
 };

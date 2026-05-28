@@ -4,7 +4,7 @@ interface Profile {
   email: string;
   ssh_key?: string;
   gpg_key?: string;
-  github_login?: string;
+  github_username?: string;
   host_pattern?: string;
   default_branch?: string;
   signing_commits?: boolean;
