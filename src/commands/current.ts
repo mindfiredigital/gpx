@@ -47,9 +47,9 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
       },
       local: localIdentity
         ? {
-          profile: localProfileName,
-          ...localIdentity,
-        }
+            profile: localProfileName,
+            ...localIdentity,
+          }
         : null,
     };
 
@@ -60,8 +60,7 @@ export const runCurrentCommand = async (json: boolean): Promise<number> => {
 
     printHuman(`Active profile: ${activeProfile ?? 'none'}`);
     printHuman(`Scope: ${activeScope}`);
-    if (authMethod)
-      printHuman(`Auth method: ${authMethod}`);
+    if (authMethod) printHuman(`Auth method: ${authMethod}`);
     printHuman(`Global name: ${globalIdentity.name ?? 'not set'}`);
     printHuman(`Global email: ${globalIdentity.email ?? 'not set'}`);
 

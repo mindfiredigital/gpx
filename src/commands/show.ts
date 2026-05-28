@@ -44,7 +44,7 @@ export const runShowCommand = async (profileName: string, json: boolean): Promis
     }
 
     if (profile.auth_method === 'pat') {
-      humanOutputData.push(`GitHub login: ${profile.github_login ?? 'not set'}`);
+      humanOutputData.push(`GitHub username: ${profile.github_username ?? 'not set'}`);
       if (PLATFORM === 'win32') {
         humanOutputData.push(`PAT: not supported on Windows`);
       } else {

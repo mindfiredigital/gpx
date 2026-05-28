@@ -2,7 +2,10 @@ import { getProfile } from '../core/profileManagement/profiles';
 import { ExitCode, PLATFORM } from '../lib/constants';
 import { handleCommandError, printHuman, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
-import { storePatForProfile, deletePatForProfile } from '../core/credentialManagement/credentialStore';
+import {
+  storePatForProfile,
+  deletePatForProfile,
+} from '../core/credentialManagement/credentialStore';
 import { validatePat } from '../core/githubManagement/validatePat';
 import { ensureCredentialHelperAdded } from '../core/credentialManagement/ensureHelper';
 import { password } from '@inquirer/prompts';
