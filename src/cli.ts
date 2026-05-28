@@ -252,7 +252,8 @@ await yargs(hideBin(process.argv))
         .option('email', { type: 'string' })
         .option('ssh-key', { type: 'string' })
         .option('gpg-key', { type: 'string' })
-        .option('signing', { type: 'boolean' }),
+        .option('signing', { type: 'boolean' })
+        .option('github-username', { type: 'string' }),
     async (argv: any) => {
       process.exitCode = await runEditCommand(
         argv.name,
@@ -262,6 +263,7 @@ await yargs(hideBin(process.argv))
           sshKey: argv.sshKey,
           gpgKey: argv.gpgKey,
           signing: argv.signing,
+          githubUsername: argv.githubUsername,
         },
         argv.json
       );
