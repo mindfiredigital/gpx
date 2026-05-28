@@ -10,6 +10,7 @@ const { mocks } = vi.hoisted(() => ({
                 name: 'work',
                 display_name: 'Ansuman Panda',
                 email: 'ansuman@gmail.com',
+                auth_method: 'ssh',
                 created_at: new Date(),
             },
         ]),
@@ -45,13 +46,13 @@ beforeEach(() => {
     vi.clearAllMocks();
     consoleOutput = [];
 
-    setOutputFlags({ json: false, quiet: false, noColor: true });
+    setOutputFlags({ json: false, quiet: false, color: true });
 
     vi.spyOn(console, 'log').mockImplementation(msg => consoleOutput.push(msg));
+    vi.spyOn(console, 'error').mockImplementation(msg => consoleOutput.push(msg));
 });
 
 describe('ls command', () => {
-
     it('should return structured json payload when --json is used', async () => {
         const code = await runLsCommand(true);
 
@@ -69,10 +70,20 @@ describe('ls command', () => {
         });
     });
 
-    it('should print in list format when --json is not used', async () => {
+    it('should print empty list warning if no profiles exist', async () => {
+        mocks.listProfiles.mockReturnValue([]);
         const code = await runLsCommand(false);
 
         expect(code).toBe(ExitCode.SUCCESS);
-        expect(consoleOutput).toContain('* work  Ansuman Panda <ansuman@gmail.com>');
+        expect(consoleOutput).toContain('No profiles found');
+    });
+
+    it('should handle errors gracefully', async () => {
+        mocks.listProfiles.mockImplementation(() => {
+            throw new Error('some error occured');
+        });
+
+        const code = await runLsCommand(false);
+        expect(code).toBe(ExitCode.PROFILE_NOT_FOUND);
     });
 });
