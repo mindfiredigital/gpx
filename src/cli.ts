@@ -55,21 +55,22 @@ await yargs(hideBin(process.argv))
     async (argv: any) => {
       // Skip select() if --auth-method was provided via flag
       if (!argv.authMethod) {
-        const authChoices: { name: string; value: string }[] = [
-          { name: 'Secure Shell (SSH)', value: 'ssh' },
-        ];
         if (PLATFORM !== 'win32') {
-          authChoices.push({ name: 'Personal Access Token (PAT)', value: 'pat' });
-        }
-        argv.authMethod = await select({
-          message: 'Add Profile using:',
-          choices: authChoices,
-          theme: {
-            style: {
-              keysHelpTip: () => undefined,
+          argv.authMethod = 'ssh';
+        } else {
+          argv.authMethod = await select({
+            message: 'Add Profile using:',
+            choices: [
+              { name: 'Secure Shell (SSH)', value: 'ssh' },
+              { name: 'Personal Access Token (PAT)', value: 'pat' },
+            ],
+            theme: {
+              style: {
+                keysHelpTip: () => undefined,
+              },
             },
-          },
-        });
+          });
+        }
       }
 
       if (argv.authMethod === 'ssh') {
