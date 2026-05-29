@@ -75,7 +75,7 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
-      copyright: `© ${new Date().getFullYear()} Mindfire GPX`,
+      copyright: `© ${new Date().getFullYear()} Mindfire FOSS`,
     },
     prism: {
       theme: prismThemes.github,
