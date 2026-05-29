@@ -55,7 +55,7 @@ await yargs(hideBin(process.argv))
     async (argv: any) => {
       // Skip select() if --auth-method was provided via flag
       if (!argv.authMethod) {
-        if (PLATFORM !== 'win32') {
+        if (PLATFORM === 'win32') {
           argv.authMethod = 'ssh';
         } else {
           argv.authMethod = await select({

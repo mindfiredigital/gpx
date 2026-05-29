@@ -1,25 +1,37 @@
 ## Edit a profile
+
+You can update any saved profile attribute using the edit command.
+
 ### Commands
 
-### Update SSH key
+#### Update Display Name and Email
+```bash
+gpx edit <profile_name> --display-name "New Display Name" --email "new@email.com"
 ```
+
+#### Update GitHub Username (PAT profiles only)
+```bash
+gpx edit <profile_name> --github-username <username>
+```
+
+#### Update SSH Key
+```bash
 gpx edit <profile_name> --ssh-key <private_ssh_key_path>
 ```
-### Updated profile: work
 
-### Update GPG key
-```
+#### Update GPG Key
+```bash
 gpx edit <profile_name> --gpg-key <new_gpg_key>
 ```
 
-### Enable signing
-```
+#### Enable / Disable signing
+```bash
 gpx edit <profile_name> --signing <true/false>
 ```
 
-### Multiple changes at once
-```
-gpx edit work --ssh-key <private_key_path> --gpg-key <new_gpg_key> --signing <true/false>
+#### Multiple changes at once
+```bash
+gpx edit work --display-name "Ada Lovelace" --gpg-key <new_gpg_key> --signing true
 ```
 
-> **Note:** name, display_name, and email cannot be edited (fetched from GitHub OAuth).
+#### **NOTE** - The unique profile name (e.g. `work` or `personal`) is the identifier and cannot be changed. All other parameters can be edited.

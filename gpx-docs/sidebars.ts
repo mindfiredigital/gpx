@@ -23,6 +23,7 @@ const sidebars: SidebarsConfig = {
         'commands/Init',
         'commands/Completion',
         'commands/Config',
+        'commands/Pat',
       ],
     }
   ],
