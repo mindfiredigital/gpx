@@ -29,11 +29,13 @@ export const runGitCredentialCommand = async (action: string): Promise<void> => 
 
   if (attrs['host'] !== 'github.com' || attrs['protocol'] !== 'https') return;
 
-  let profileName: string | null = null;
+  let profileName: string | null = process.env.GPX_ACTIVE_PROFILE || null;
 
-  const proc = spawnSync('git', ['config', '--local', 'gpx.profile']);
-  if (proc.status === 0) {
-    profileName = proc.stdout.toString().trim();
+  if (!profileName) {
+    const proc = spawnSync('git', ['config', '--local', 'gpx.profile']);
+    if (proc.status === 0) {
+      profileName = proc.stdout.toString().trim();
+    }
   }
 
   if (!profileName) {

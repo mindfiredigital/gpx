@@ -39,11 +39,13 @@ export async function runRunCommand(
       env['GIT_COMMITTER_SIGNINGKEY'] = profile.gpg_key;
     }
 
+    env['GPX_ACTIVE_PROFILE'] = profile.name;
+
     let prevActive: Awaited<ReturnType<typeof loadActive>> | null = null;
     const isPat = profile.auth_method === 'pat' && PLATFORM !== 'win32';
 
-    const restoreProfile = () => {
-      if (prevActive !== null) saveActive(prevActive);
+    const restoreProfile = async () => {
+      if (prevActive !== null) await saveActive(prevActive);
       process.exit(1);
     };
 
