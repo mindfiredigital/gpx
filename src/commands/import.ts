@@ -73,6 +73,7 @@ export const runImportCommand = async (
         email: entry.email as string,
         ssh_key: (entry.ssh_key as string) || undefined,
         gpg_key: (entry.gpg_key as string) || undefined,
+        github_username: (entry.github_username as string) || undefined,
         signing_commits: (entry.signing_commits as boolean) || false,
         auth_method: entry.auth_method,
         created_at: (entry.created_at as string) || new Date().toISOString(),
