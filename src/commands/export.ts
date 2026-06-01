@@ -30,6 +30,7 @@ export const runExportCommand = async (
         gpg_key: profile.gpg_key,
         signing_commits: profile.signing_commits,
         created_at: profile.created_at,
+        last_used_at: profile.last_used_at,
       };
 
       if (includePublicKeys && profile.ssh_key) {

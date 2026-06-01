@@ -7,7 +7,7 @@ interface GpxConfig {
 type GlobalCliOptions = {
   json?: boolean;
   noInteractive?: boolean;
-  noColor?: boolean;
+  color?: boolean;
   quiet?: boolean;
 };
 

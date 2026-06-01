@@ -6,6 +6,7 @@ import { getProfile, updateProfile } from '../core/profileManagement/profiles';
 import { ExitCode } from '../lib/constants';
 import type { Profile } from '../lib/types/Profile.type';
 import { handleCommandError, printHuman, printJson, printSuccess } from '../utils/output';
+import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 
 export const runEditCommand = async (
   profileName: string,
@@ -29,7 +30,7 @@ export const runEditCommand = async (
       !options.email &&
       !options.sshKey &&
       !options.gpgKey &&
-      !options.signing
+      options.signing === undefined
     )
       throw new ProfileError(
         `Use: gpx edit --help \nEnter atleast one valid flag`,
@@ -75,7 +76,12 @@ export const runEditCommand = async (
 
     if (isActive) {
       const updatedProfile = getProfile(profileName);
-      if (updatedProfile) applyProfileToGitConfig(updatedProfile, 'global');
+      if (updatedProfile) {
+        applyProfileToGitConfig(updatedProfile, 'global');
+        if (options.sshKey && updatedProfile.ssh_key) {
+          await upsertSshConfigForProfile(updatedProfile);
+        }
+      }
     }
 
     if (json) {
