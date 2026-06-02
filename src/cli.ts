@@ -24,14 +24,14 @@ await yargs(hideBin(process.argv))
   .scriptName('gpx')
   .option('json', { type: 'boolean', default: false })
   .option('no-interactive', { type: 'boolean', default: false })
-  .option('no-color', { type: 'boolean', default: false })
+  .option('color', { type: 'boolean', default: true })
   .option('quiet', { type: 'boolean', default: false })
   .middleware((argv: GlobalCliOptions) => {
     const opts = argv;
     setOutputFlags({
       json: Boolean(opts.json),
       quiet: Boolean(opts.quiet),
-      noColor: Boolean(opts.noColor),
+      color: Boolean(opts.color),
     });
   }, true)
   .command(
@@ -163,7 +163,7 @@ await yargs(hideBin(process.argv))
   .command('config', 'Get or set gpx configuration', (builder: any) =>
     builder
       .command(
-        'get auto_detect',
+        'get auto-detect',
         'Get a config value',
         () => {},
         async (argv: any) => {
@@ -171,9 +171,9 @@ await yargs(hideBin(process.argv))
         }
       )
       .command(
-        'set auto_detect',
+        'set auto-detect <update>',
         'Set a config value',
-        (b: any) => b.option('update', { type: 'boolean', choices: [true, false], default: true }),
+        (b: any) => b.positional('update', { type: 'boolean', choices: [true, false] }),
         async (argv: any) => {
           process.exitCode = await runConfigSetCommand(argv.update, argv.json);
         }

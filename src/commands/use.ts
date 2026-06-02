@@ -1,4 +1,4 @@
-import { getProfile } from '../core/profileManagement/profiles';
+import { getProfile, updateProfile } from '../core/profileManagement/profiles';
 import { saveActive } from '../core/profileManagement/activeStore';
 import {
   applyProfileToGitConfig,
@@ -72,6 +72,8 @@ export const runUseCommand = async (
         switched_at: new Date().toISOString(),
       });
     }
+
+    await updateProfile(profile.name, { last_used_at: new Date().toISOString() });
 
     const payload = {
       active: {

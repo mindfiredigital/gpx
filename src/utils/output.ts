@@ -4,17 +4,17 @@ import { ProfileError } from '../core/profileManagement/errorClass';
 let outputOptions = {
   json: false,
   quiet: false,
-  noColor: false,
+  color: false,
 };
 
-const setOutputFlags = (flags: { json?: boolean; quiet?: boolean; noColor?: boolean }): void => {
+const setOutputFlags = (flags: { json?: boolean; quiet?: boolean; color?: boolean }): void => {
   outputOptions = { ...outputOptions, ...flags };
 };
 
 const isJsonMode = (): boolean => outputOptions.json;
 
 const applyColor = (text: string, code: string): string => {
-  return outputOptions.noColor ? text : `\x1b[${code}m${text}\x1b[0m`;
+  return outputOptions.color ? `\x1b[${code}m${text}\x1b[0m` : text;
 };
 
 const fmt = {
