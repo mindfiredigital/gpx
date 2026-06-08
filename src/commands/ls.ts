@@ -1,7 +1,7 @@
 import { listProfiles } from '../core/profileManagement/profiles';
 import { loadActive } from '../core/profileManagement/activeStore';
 import { ExitCode } from '../lib/constants';
-import { handleCommandError, printHuman, printJson } from '../utils/output';
+import { fmt, handleCommandError, printHuman, printJson } from '../utils/output';
 
 export const runLsCommand = async (json: boolean): Promise<number> => {
   try {
@@ -19,8 +19,11 @@ export const runLsCommand = async (json: boolean): Promise<number> => {
     }
 
     for (const profile of profiles) {
-      const marker = active === profile.name ? '*' : ' ';
-      printHuman(`${marker} ${profile.name}  ${profile.display_name} <${profile.email}>`);
+      const marker = active === profile.name ? fmt.green('*') : ' ';
+      const authBadge = profile.auth_method === 'pat' ? fmt.cyan('[pat]') : fmt.cyan('[ssh]');
+      printHuman(
+        `${marker} ${profile.name}  ${profile.display_name} <${profile.email}>  ${authBadge}`
+      );
     }
 
     return ExitCode.SUCCESS;

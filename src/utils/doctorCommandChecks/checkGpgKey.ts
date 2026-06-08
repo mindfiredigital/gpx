@@ -1,6 +1,6 @@
 import type { Profile } from '../../lib/types/Profile.type';
 import type { CheckResult } from '../../lib/types/CheckResult.type';
-import { safeGet } from '../../core/gitconfig';
+import { spawnSync } from 'node:child_process';
 
 export const checkGpgKey = (profile: Profile): CheckResult => {
   if (!profile.gpg_key) {
@@ -11,9 +11,9 @@ export const checkGpgKey = (profile: Profile): CheckResult => {
     };
   }
 
-  const output = safeGet(`gpg --list-keys ${profile.gpg_key} 2>&1`);
+  const result = spawnSync('gpg', ['--list-keys', profile.gpg_key], { encoding: 'utf-8' });
 
-  if (output === null || output.includes('error') || output.includes('not found')) {
+  if (result.status !== 0) {
     return {
       label: `GPG key (${profile.name})`,
       status: 'fail',

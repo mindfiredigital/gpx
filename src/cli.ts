@@ -2,7 +2,7 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { runAddCommand } from './commands/add';
+import { runSshAddCommand, runPatAddCommand } from './commands/add';
 import { runLsCommand } from './commands/ls';
 import { runUseCommand } from './commands/use';
 import { runCurrentCommand } from './commands/current';
@@ -19,6 +19,10 @@ import { runDoctorCommand } from './commands/doctor';
 import { runExportCommand } from './commands/export';
 import { runImportCommand } from './commands/import';
 import { runEditCommand } from './commands/edit';
+import { runPatSetCommand, runPatClearCommand } from './commands/pat';
+import { runGitCredentialCommand } from './core/credentialManagement/gpxCredentialHelper';
+import { password, select } from '@inquirer/prompts';
+import { PLATFORM } from './lib/constants';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -45,19 +49,60 @@ await yargs(hideBin(process.argv))
         .option('ssh-key', { type: 'string' })
         .option('generate-ssh', { type: 'boolean', default: false })
         .option('gpg-key', { type: 'string' })
-        .option('signing', { type: 'boolean', default: false }),
+        .option('signing', { type: 'boolean', default: false })
+        .option('auth-method', { type: 'string', choices: ['ssh', 'pat'] })
+        .option('pat', { type: 'string' }),
     async (argv: any) => {
-      process.exitCode = await runAddCommand({
-        name: argv.name,
-        displayName: argv.displayName,
-        email: argv.email,
-        sshKey: argv.sshKey,
-        generateSsh: argv.generateSsh,
-        gpgKey: argv.gpgKey,
-        signing: argv.signing,
-        noInteractive: argv.noInteractive,
-        json: argv.json,
-      });
+      // Skip select() if --auth-method was provided via flag
+      if (!argv.authMethod) {
+        if (PLATFORM === 'win32') {
+          argv.authMethod = 'ssh';
+        } else {
+          argv.authMethod = await select({
+            message: 'Add Profile using:',
+            choices: [
+              { name: 'Secure Shell (SSH)', value: 'ssh' },
+              { name: 'Personal Access Token (PAT)', value: 'pat' },
+            ],
+            theme: {
+              style: {
+                keysHelpTip: () => undefined,
+              },
+            },
+          });
+        }
+      }
+
+      if (argv.authMethod === 'ssh') {
+        process.exitCode = await runSshAddCommand({
+          name: argv.name,
+          displayName: argv.displayName,
+          email: argv.email,
+          sshKey: argv.sshKey,
+          generateSsh: argv.generateSsh,
+          gpgKey: argv.gpgKey,
+          signing: argv.signing,
+          authMethod: argv.authMethod,
+          noInteractive: argv.noInteractive,
+          json: argv.json,
+        });
+      } else {
+        // Skip password() prompt if --pat flag was provided directly
+        if (!argv.pat) {
+          argv.pat = await password({ message: 'Enter Personal Access Token:' });
+        }
+        process.exitCode = await runPatAddCommand({
+          name: argv.name,
+          displayName: argv.displayName,
+          email: argv.email,
+          pat: argv.pat,
+          gpgKey: argv.gpgKey,
+          signing: argv.signing,
+          authMethod: argv.authMethod,
+          noInteractive: argv.noInteractive,
+          json: argv.json,
+        });
+      }
     }
   )
   .command(
@@ -77,18 +122,7 @@ await yargs(hideBin(process.argv))
     }
   )
   .command(
-    'remove <name>',
-    'Remove a profile',
-    (builder: any) =>
-      builder
-        .positional('name', { type: 'string', demandOption: true })
-        .option('force', { type: 'boolean', default: false }),
-    async (argv: any) => {
-      process.exitCode = await runRemoveCommand(argv.name, argv.force, argv.json);
-    }
-  )
-  .command(
-    'rm <name>',
+    ['remove <name>', 'rm <name>'],
     'Remove a profile',
     (builder: any) =>
       builder
@@ -219,7 +253,8 @@ await yargs(hideBin(process.argv))
         .option('email', { type: 'string' })
         .option('ssh-key', { type: 'string' })
         .option('gpg-key', { type: 'string' })
-        .option('signing', { type: 'boolean' }),
+        .option('signing', { type: 'boolean' })
+        .option('github-username', { type: 'string' }),
     async (argv: any) => {
       process.exitCode = await runEditCommand(
         argv.name,
@@ -229,9 +264,47 @@ await yargs(hideBin(process.argv))
           sshKey: argv.sshKey,
           gpgKey: argv.gpgKey,
           signing: argv.signing,
+          githubUsername: argv.githubUsername,
         },
         argv.json
       );
+    }
+  )
+  .command('pat', 'Manage PAT for a profile', (builder: any) =>
+    builder
+      .command(
+        'set <profile>',
+        'Set or rotate PAT for a profile',
+        (b: any) =>
+          b
+            .positional('profile', { type: 'string', demandOption: true })
+            .option('pat', { type: 'string' }),
+        async (argv: any) => {
+          process.exitCode = await runPatSetCommand(argv.profile, argv.pat, argv.json);
+        }
+      )
+      .command(
+        'clear <profile>',
+        'Remove stored PAT for a profile',
+        (b: any) => b.positional('profile', { type: 'string', demandOption: true }),
+        async (argv: any) => {
+          process.exitCode = await runPatClearCommand(argv.profile, argv.json);
+        }
+      )
+      .demandCommand(1, 'Use: gpx pat set <profile> | gpx pat clear <profile>')
+  )
+  // Internal command invoked by git credential helper - not shown in help
+  .command(
+    'git-credential <action>',
+    false,
+    (builder: any) =>
+      builder.positional('action', {
+        type: 'string',
+        choices: ['get', 'store', 'erase'],
+        demandOption: true,
+      }),
+    async (argv: any) => {
+      await runGitCredentialCommand(argv.action);
     }
   )
   .demandCommand(1, 'Use a command. Try: gpx --help')

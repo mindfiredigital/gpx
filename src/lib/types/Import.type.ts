@@ -7,6 +7,8 @@ export interface Profile {
   created_at: string;
   ssh_public_key?: string;
   gpg_key?: string;
+  github_username?: string;
+  auth_method: 'ssh' | 'pat';
   last_used_at?: string;
 }
 

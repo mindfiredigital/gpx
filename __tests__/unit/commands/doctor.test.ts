@@ -50,6 +50,7 @@ const workProfile = {
   display_name: 'ansumain',
   email: '2004.ansuman@gmail.com',
   ssh_key: '~/.ssh/id_ed25519_gpx_work',
+  auth_method: 'ssh' as const,
   created_at: new Date().toISOString(),
 };
 
@@ -59,7 +60,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   consoleOutput = [];
 
-  setOutputFlags({ json: false, quiet: false, noColor: true });
+  setOutputFlags({ json: false, quiet: false, color: true });
 
   mocks.checkGitInstalled.mockReturnValue({
     label: 'Git installed',

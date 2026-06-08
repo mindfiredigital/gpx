@@ -73,7 +73,7 @@ let consoleOutput: string[] = [];
 beforeEach(() => {
   vi.clearAllMocks();
   consoleOutput = [];
-  setOutputFlags({ json: false, quiet: false, noColor: true });
+  setOutputFlags({ json: false, quiet: false, color: true });
 
   vi.spyOn(console, 'log').mockImplementation((msg) => consoleOutput.push(msg));
   vi.spyOn(console, 'error').mockImplementation((msg) => consoleOutput.push(msg));
@@ -209,4 +209,4 @@ describe('current command - human', () => {
     expect(consoleOutput).toContain('Local name: Ansuman Mindfire');
     expect(consoleOutput).toContain('Local email: ansuman@mindfire.com');
   });
-})
+});

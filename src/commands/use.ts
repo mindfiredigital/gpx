@@ -5,13 +5,18 @@ import {
   getGpxProfileFromRemote,
   getRemoteUrl,
   isInsideGitRepo,
+  isHttpsRemote,
   updateRemoteForProfile,
+  sshAliasToHttps,
+  httpsToSshAlias,
+  safeGit,
 } from '../core/gitconfig';
-import { ExitCode } from '../lib/constants';
+import { ExitCode, PLATFORM } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess, printWarn } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 import { validateSshKeyForProfile } from '../core/sshConfigManagement/sshKeyExistencePermissionCheck';
+import { ensureCredentialHelperAdded } from '../core/credentialManagement/ensureHelper';
 import type { RemoteUpdate } from '../lib/types/RemoteUpdate.type';
 
 export const runUseCommand = async (
@@ -27,7 +32,9 @@ export const runUseCommand = async (
 
     const scope = local ? 'local' : 'global';
     const warnings: string[] = [];
+    const remoteUpdates: RemoteUpdate[] = [];
 
+    // Warn when switching locally if the repo remote belongs to a different profile
     if (local && isInsideGitRepo()) {
       const remoteUrl = getRemoteUrl('origin');
       if (remoteUrl) {
@@ -39,30 +46,81 @@ export const runUseCommand = async (
         }
       }
     }
+
+    // Always apply git identity (user.name / user.email / gpg)
     applyProfileToGitConfig(profile, scope);
 
-    if (profile.ssh_key) {
-      const sshValidation = validateSshKeyForProfile(profile);
-      if (!sshValidation.exists) {
-        warnings.push(
-          `SSH key not found: ${profile.ssh_key}.\nGit identity switched successfully.\nFix: run gpx doctor ${profile.name} to diagnose SSH issues.`
-        );
-      } else {
-        if (!sshValidation.permissionOk) {
-          warnings.push(`SSH key permissions not strict: ${profile.ssh_key}`);
+    const authMethod = profile.auth_method;
+
+    if (authMethod === 'ssh') {
+      if (profile.ssh_key) {
+        const sshValidation = validateSshKeyForProfile(profile);
+        if (!sshValidation.exists) {
+          warnings.push(
+            `SSH key not found: ${profile.ssh_key}.\nGit identity switched successfully.\nFix: run gpx doctor ${profile.name} to diagnose SSH issues.`
+          );
+        } else {
+          if (!sshValidation.permissionOk) {
+            warnings.push(`SSH key permissions not strict: ${profile.ssh_key}`);
+          }
+          await upsertSshConfigForProfile(profile);
         }
-        await upsertSshConfigForProfile(profile);
       }
-    }
 
-    const remoteUpdates: RemoteUpdate[] = [];
-    if (isInsideGitRepo()) {
-      const result = updateRemoteForProfile(profile.name, scope);
+      if (local && isInsideGitRepo()) {
+        const result = updateRemoteForProfile(profile.name, scope);
+        remoteUpdates.push(...result.updated);
 
-      remoteUpdates.push(...result.updated);
+        for (const httpsWarnMsg of result.httpsWarnings) {
+          const urlMatch = httpsWarnMsg.match(/\(([^)]+)\)/);
+          const remoteNameMatch = httpsWarnMsg.match(/Remote "([^"]+)"/);
+          const remoteName = remoteNameMatch?.[1] ?? 'origin';
+          const httpsUrl = urlMatch?.[1];
+          if (httpsUrl) {
+            const sshAlias = httpsToSshAlias(httpsUrl, profile.name);
+            if (sshAlias) {
+              warnings.push(
+                `Remote '${remoteName}' uses HTTPS - SSH auth needs an SSH URL.\n  Run: git remote set-url ${remoteName} ${sshAlias}`
+              );
+            } else {
+              warnings.push(httpsWarnMsg);
+            }
+          } else {
+            warnings.push(httpsWarnMsg);
+          }
+        }
+      }
+    } else if (authMethod === 'pat') {
+      if (PLATFORM === 'win32') {
+        throw new ProfileError(
+          'PAT authentication is not supported on Windows.',
+          ExitCode.INVALID_INPUT
+        );
+      }
 
-      for (const httpsWarn of result.httpsWarnings) {
-        warnings.push(httpsWarn);
+      ensureCredentialHelperAdded();
+
+      if (local && isInsideGitRepo()) {
+        const remotesRaw = safeGit(['remote']);
+        const remotes = remotesRaw ? remotesRaw.split('\n').filter(Boolean) : [];
+
+        for (const remote of remotes) {
+          const remoteUrl = getRemoteUrl(remote);
+          if (!remoteUrl) continue;
+
+          if (!isHttpsRemote(remoteUrl)) {
+            const httpsUrl = sshAliasToHttps(remoteUrl);
+            if (httpsUrl) {
+              warnings.push(
+                `Remote '${remote}' uses SSH format - PAT needs an HTTPS URL.\n  Run: git remote set-url ${remote} ${httpsUrl}`
+              );
+            } else {
+              warnings.push(
+                `Remote '${remote}' is not a GitHub HTTPS URL. PAT auth requires HTTPS remotes.\n  Update it: git remote set-url ${remote} https://github.com/<owner>/<repo>.git`
+              );
+            }
+          }
+        }
       }
     }
 
@@ -81,6 +139,7 @@ export const runUseCommand = async (
         display_name: profile.display_name,
         email: profile.email,
         scope,
+        auth_method: authMethod,
       },
       remotes_updated: remoteUpdates,
       warnings,
