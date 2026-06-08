@@ -1,5 +1,5 @@
-import { API_BASE } from "../../lib/constants";
-import type { GitHubUser } from "../../lib/types/ValidatePat.type";
+import { API_BASE } from '../../lib/constants';
+import type { GitHubUser } from '../../lib/types/ValidatePat.type';
 
 export const validatePat = async (pat: string): Promise<GitHubUser> => {
   const headers = {
