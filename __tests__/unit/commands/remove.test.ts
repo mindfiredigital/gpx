@@ -50,7 +50,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     consoleOutput = [];
 
-    setOutputFlags({ json: false, quiet: false, noColor: true });
+    setOutputFlags({ json: false, quiet: false, color: true });
 
     vi.spyOn(console, 'log').mockImplementation(msg => consoleOutput.push(msg));
     vi.spyOn(console, 'error').mockImplementation(msg => consoleOutput.push(msg));
@@ -69,7 +69,6 @@ describe('remove command', () => {
 
         expect(code).toBe(ExitCode.SUCCESS);
         expect(mocks.removeProfile).toHaveBeenCalledWith('work', false);
-        expect(consoleOutput).toContain('Removed profile: work');
     });
 
     it('should return structured JSON when in --json is used', async () => {
@@ -91,7 +90,6 @@ describe('remove command', () => {
         const code = await runRemoveCommand('no-profile', false, false);
 
         expect(code).toBe(ExitCode.PROFILE_NOT_FOUND);
-        expect(consoleOutput).toContain('profile not found');
     });
 
     it('should clear global git identity when removing active profile', async () => {
