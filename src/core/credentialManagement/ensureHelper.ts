@@ -1,9 +1,7 @@
 import { spawnSync } from 'node:child_process';
-import { PLATFORM, GPX_CREDENTIAL_HELPER } from '../../lib/constants';
+import { GPX_CREDENTIAL_HELPER } from '../../lib/constants';
 
 export const ensureCredentialHelperAdded = (): void => {
-  if (PLATFORM === 'win32') return;
-
   const result = spawnSync('git', [
     'config',
     '--global',
@@ -31,7 +29,5 @@ export const ensureCredentialHelperAdded = (): void => {
 };
 
 export const removeCredentialHelper = (): void => {
-  if (PLATFORM === 'win32') return;
-
   spawnSync('git', ['config', '--global', '--remove-section', 'credential.https://github.com']);
 };

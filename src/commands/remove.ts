@@ -11,7 +11,6 @@ import {
   isInsideGitRepo,
 } from '../core/gitconfig';
 import { deletePatForProfile } from '../core/credentialManagement/credentialStore';
-import { PLATFORM } from '../lib/constants';
 
 export const runRemoveCommand = async (
   profileName: string,
@@ -37,7 +36,7 @@ export const runRemoveCommand = async (
     await removeSshConfigForProfile(profileName, profile?.ssh_key);
     if (profile?.ssh_key) moveSshKeysToRemoved(profile.ssh_key);
 
-    if (profile?.auth_method === 'pat' && PLATFORM !== 'win32') {
+    if (profile?.auth_method === 'pat') {
       await deletePatForProfile(profileName);
     }
 

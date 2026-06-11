@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { getProfile } from '../core/profileManagement/profiles';
 import { loadActive, saveActive } from '../core/profileManagement/activeStore';
-import { ExitCode, PLATFORM } from '../lib/constants';
+import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { ensureCredentialHelperAdded } from '../core/credentialManagement/ensureHelper';
@@ -42,7 +42,7 @@ export async function runRunCommand(
     env['GPX_ACTIVE_PROFILE'] = profile.name;
 
     let prevActive: Awaited<ReturnType<typeof loadActive>> | null = null;
-    const isPat = profile.auth_method === 'pat' && PLATFORM !== 'win32';
+    const isPat = profile.auth_method === 'pat';
 
     const restoreProfile = async () => {
       if (prevActive !== null) await saveActive(prevActive);
