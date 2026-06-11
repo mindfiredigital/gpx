@@ -1,6 +1,10 @@
-import { isInsideGitRepo, getRemoteUrl, getGpxProfileFromRemote } from './gitconfig';
+import {
+  isInsideGitRepo,
+  getRemoteUrl,
+  getGpxProfileFromRemote,
+  getGpxLocalProfileName,
+} from './gitconfig';
 import { getProfile } from './profileManagement/profiles';
-import { loadActive } from './profileManagement/activeStore';
 import type { AutoDetectResult } from '../lib/types/autoDetect.type';
 
 const detectProfileFromRepo = (): AutoDetectResult => {
@@ -44,8 +48,7 @@ const detectProfileFromRepo = (): AutoDetectResult => {
     };
   }
 
-  const active = loadActive();
-  const currentProfileName = active.global || null;
+  const currentProfileName = getGpxLocalProfileName() || null;
 
   const needsSwitch = currentProfileName !== detectedProfile.name;
 
