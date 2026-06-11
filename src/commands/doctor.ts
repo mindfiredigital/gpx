@@ -10,6 +10,7 @@ import { checkSshKey } from '../utils/doctorCommandChecks/checkSshKey';
 import { checkGpgKey } from '../utils/doctorCommandChecks/checkGpgKey';
 import { checkRepoRemoteMatch } from '../utils/doctorCommandChecks/checkRepoRemoteMatch';
 import { checkPatAuth } from '../utils/doctorCommandChecks/checkPatAuth';
+import { checkCommitGuard } from '../utils/doctorCommandChecks/checkCommitGuard';
 
 const printCheck = (check: CheckResult): void => {
   let icon: string, colorFn;
@@ -36,6 +37,10 @@ export const runDoctorCommand = async (
 
     checks.push(checkGitInstalled());
     checks.push(checkGitIdentity());
+    const guardCheck = checkCommitGuard();
+    if (guardCheck) {
+      checks.push(guardCheck);
+    }
 
     if (profileName) {
       const profile = getProfile(profileName);
