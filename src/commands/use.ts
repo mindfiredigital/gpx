@@ -10,9 +10,16 @@ import {
   sshAliasToHttps,
   httpsToSshAlias,
   safeGit,
+  getExpectedProfile,
 } from '../core/gitconfig';
 import { ExitCode } from '../lib/constants';
-import { handleCommandError, printJson, printSuccess, printWarn } from '../utils/output';
+import {
+  handleCommandError,
+  printJson,
+  printSuccess,
+  printWarn,
+  printHuman,
+} from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
 import { validateSshKeyForProfile } from '../core/sshConfigManagement/sshKeyExistencePermissionCheck';
@@ -143,6 +150,12 @@ export const runUseCommand = async (
     } else {
       for (const warning of warnings) printWarn(`Warning: ${warning}`);
       printSuccess(`Switched to ${profile.name} (${scope})`);
+      if (local && isInsideGitRepo()) {
+        const expectedProfile = getExpectedProfile();
+        if (!expectedProfile) {
+          printHuman(`\n💡 Tip: To prevent accidental commits, run 'gpx guard'`);
+        }
+      }
     }
 
     return ExitCode.SUCCESS;
