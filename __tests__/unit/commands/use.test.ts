@@ -11,6 +11,10 @@ const { mocks } = vi.hoisted(() => ({
     applyProfileToGitConfig: vi.fn(),
     isInsideGitRepo: vi.fn(),
     updateRemoteForProfile: vi.fn(),
+    getExpectedProfile: vi.fn(),
+    validateSshKeyForProfile: vi.fn(),
+    getRemoteUrl: vi.fn(),
+    getGpxProfileFromRemote: vi.fn(),
   },
 }));
 
@@ -27,12 +31,25 @@ vi.mock('../../../src/core/gitconfig', () => ({
   applyProfileToGitConfig: mocks.applyProfileToGitConfig,
   isInsideGitRepo: mocks.isInsideGitRepo,
   updateRemoteForProfile: mocks.updateRemoteForProfile,
-  getRemoteUrl: vi.fn(),
-  getGpxProfileFromRemote: vi.fn(),
+  getRemoteUrl: mocks.getRemoteUrl,
+  getGpxProfileFromRemote: mocks.getGpxProfileFromRemote,
   isHttpsRemote: vi.fn(),
   sshAliasToHttps: vi.fn(),
   httpsToSshAlias: vi.fn(() => 'git@github.com-work:owner/repo.git'),
   safeGit: vi.fn(),
+  getExpectedProfile: mocks.getExpectedProfile,
+}));
+
+vi.mock('../../../src/core/sshConfigManagement/sshconfig', () => ({
+  upsertSshConfigForProfile: vi.fn(),
+}));
+
+vi.mock('../../../src/core/credentialManagement/ensureHelper', () => ({
+  ensureCredentialHelperAdded: vi.fn(),
+}));
+
+vi.mock('../../../src/core/sshConfigManagement/sshKeyExistencePermissionCheck', () => ({
+  validateSshKeyForProfile: mocks.validateSshKeyForProfile,
 }));
 
 let consoleOutput: string[] = [];
@@ -53,6 +70,8 @@ beforeEach(() => {
 
   mocks.isInsideGitRepo.mockReturnValue(false);
   mocks.updateRemoteForProfile.mockReturnValue({ updated: [], httpsWarnings: [] });
+  mocks.getExpectedProfile.mockReturnValue(null);
+  mocks.validateSshKeyForProfile.mockReturnValue({ exists: true, permissionOk: true });
 
   vi.spyOn(console, 'log').mockImplementation((msg) => consoleOutput.push(msg));
   vi.spyOn(console, 'error').mockImplementation((msg) => consoleOutput.push(msg));
@@ -109,6 +128,45 @@ describe('use command', () => {
     expect(mocks.applyProfileToGitConfig).not.toHaveBeenCalled();
     expect(mocks.saveActive).not.toHaveBeenCalled();
     expect(consoleOutput).toContain('Profile not found: missing');
+  });
+
+  it('should warn when switching locally and repo belongs to a different profile', async () => {
+    mocks.isInsideGitRepo.mockReturnValue(true);
+    mocks.getRemoteUrl.mockReturnValue('git@github.com-personal:org/repo.git');
+    mocks.getGpxProfileFromRemote.mockReturnValue('personal');
+
+    const code = await runUseCommand('work', true, false);
+
+    expect(code).toBe(ExitCode.SUCCESS);
+    expect(consoleOutput.some(msg => msg.includes('You are switching to "work", locally'))).toBe(true);
+  });
+
+  it('should warn when SSH key does not exist', async () => {
+    mocks.getProfile.mockReturnValue({
+      name: 'work',
+      ssh_key: '~/.ssh/missing',
+      auth_method: 'ssh' as const,
+    });
+    mocks.validateSshKeyForProfile.mockReturnValue({ exists: false, permissionOk: false });
+
+    const code = await runUseCommand('work', true, false);
+    
+    expect(code).toBe(ExitCode.SUCCESS);
+    expect(consoleOutput.some(msg => msg.includes('SSH key not found: ~/.ssh/missing'))).toBe(true);
+  });
+
+  it('should warn when SSH key permissions are not strict', async () => {
+    mocks.getProfile.mockReturnValue({
+      name: 'work',
+      ssh_key: '~/.ssh/bad_perms',
+      auth_method: 'ssh' as const,
+    });
+    mocks.validateSshKeyForProfile.mockReturnValue({ exists: true, permissionOk: false });
+
+    const code = await runUseCommand('work', true, false);
+    
+    expect(code).toBe(ExitCode.SUCCESS);
+    expect(consoleOutput.some(msg => msg.includes('SSH key permissions not strict'))).toBe(true);
   });
 });
 
