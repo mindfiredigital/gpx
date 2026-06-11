@@ -6,6 +6,7 @@ const { mocks } = vi.hoisted(() => ({
     isInsideGitRepo: vi.fn(),
     getRemoteUrl: vi.fn(),
     getGpxProfileFromRemote: vi.fn(),
+    getGpxLocalProfileName: vi.fn(),
     getProfile: vi.fn(),
     loadActive: vi.fn(),
   },
@@ -15,6 +16,7 @@ vi.mock('../../../src/core/gitconfig', () => ({
   isInsideGitRepo: mocks.isInsideGitRepo,
   getRemoteUrl: mocks.getRemoteUrl,
   getGpxProfileFromRemote: mocks.getGpxProfileFromRemote,
+  getGpxLocalProfileName: mocks.getGpxLocalProfileName,
 }));
 
 vi.mock('../../../src/core/profileManagement/profiles', () => ({
@@ -87,6 +89,7 @@ describe('detectProfileFromRepo', () => {
       created_at: new Date().toISOString(),
     });
     mocks.loadActive.mockReturnValue({ global: 'personal' });
+    mocks.getGpxLocalProfileName.mockReturnValue('personal');
 
     const result = detectProfileFromRepo();
 
@@ -108,6 +111,7 @@ describe('detectProfileFromRepo', () => {
       created_at: new Date().toISOString(),
     });
     mocks.loadActive.mockReturnValue({ global: 'work' });
+    mocks.getGpxLocalProfileName.mockReturnValue('work');
 
     const result = detectProfileFromRepo();
 
