@@ -38,11 +38,29 @@ export const runInitCommand = async (args: InitArgs): Promise<number> => {
     const currentContent = fs.readFileSync(file, { encoding: 'utf-8' });
 
     if (currentContent.includes(scriptStart) && currentContent.includes(scriptEnd)) {
-      if (args.json) {
-        printJson({ success: true, data: { type, file } });
-        return ExitCode.SUCCESS;
+      const startIdx = currentContent.indexOf(scriptStart);
+      const endIdx = currentContent.indexOf(scriptEnd) + scriptEnd.length;
+
+      const newContent =
+        currentContent.substring(0, startIdx) +
+        scriptContent.trim() +
+        currentContent.substring(endIdx);
+
+      if (currentContent !== newContent) {
+        fs.writeFileSync(file, newContent, { encoding: 'utf-8' });
+        if (args.json) {
+          printJson({ success: true, data: { type, file, updated: true } });
+        } else {
+          printSuccess(`\ngpx shell script updated for ${type} in ${file}`);
+          printHuman(`Please restart your shell`);
+        }
+      } else {
+        if (args.json) {
+          printJson({ success: true, data: { type, file } });
+        } else {
+          printSuccess(`\ngpx already initialized and up to date in ${file}`);
+        }
       }
-      printSuccess(`\ngpx already initialized in ${file}`);
       return ExitCode.SUCCESS;
     }
 
