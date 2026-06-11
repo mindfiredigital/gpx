@@ -1,5 +1,5 @@
 import { getProfile } from '../core/profileManagement/profiles';
-import { ExitCode, PLATFORM } from '../lib/constants';
+import { ExitCode } from '../lib/constants';
 import { handleCommandError, printHuman, printJson, printSuccess } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import {
@@ -16,13 +16,6 @@ const runPatSetCommand = async (
   json: boolean
 ): Promise<number> => {
   try {
-    if (PLATFORM === 'win32') {
-      throw new ProfileError(
-        'PAT authentication is not supported on Windows.',
-        ExitCode.INVALID_INPUT
-      );
-    }
-
     const profile = getProfile(profileName);
     if (!profile) {
       throw new ProfileError(`Profile not found: ${profileName}`, ExitCode.PROFILE_NOT_FOUND);
@@ -39,7 +32,10 @@ const runPatSetCommand = async (
     if (suppliedPat && suppliedPat.trim().length > 0) {
       pat = suppliedPat.trim();
     } else {
-      pat = await password({ message: `Enter new Personal Access Token for '${profileName}':` });
+      pat = await password({
+        message: `Enter new Personal Access Token for '${profileName}':`,
+        mask: '*',
+      });
     }
 
     if (!pat || pat.trim().length === 0) {
@@ -76,13 +72,6 @@ const runPatSetCommand = async (
 
 const runPatClearCommand = async (profileName: string, json: boolean): Promise<number> => {
   try {
-    if (PLATFORM === 'win32') {
-      throw new ProfileError(
-        'PAT authentication is not supported on Windows.',
-        ExitCode.INVALID_INPUT
-      );
-    }
-
     const profile = getProfile(profileName);
     if (!profile) {
       throw new ProfileError(`Profile not found: ${profileName}`, ExitCode.PROFILE_NOT_FOUND);
