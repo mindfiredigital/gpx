@@ -4,6 +4,7 @@ const sidebars: SidebarsConfig = {
   docs: [
     'Introduction',
     'Installation',
+    'Quick Start Guide',
     {
       type: 'category',
       label: 'Commands',
