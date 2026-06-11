@@ -86,6 +86,22 @@ const getGpxLocalProfileName = (): string | null => {
   return safeGit(['config', '--local', '--get', 'gpx.profile']);
 };
 
+const getExpectedProfile = (): string | null => {
+  ensureGitInstalled();
+
+  if (!isInsideGitRepo()) return null;
+
+  return safeGit(['config', '--local', '--get', 'gpx.expectedprofile']);
+};
+
+const setExpectedProfile = (profileName: string): void => {
+  ensureGitInstalled();
+
+  if (!isInsideGitRepo()) return;
+
+  git(['config', '--local', 'gpx.expectedprofile', profileName]);
+};
+
 const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): void => {
   ensureGitInstalled();
 
@@ -236,6 +252,8 @@ export {
   findProfileNameByIdentity,
   getCurrentGitIdentity,
   getGpxLocalProfileName,
+  getExpectedProfile,
+  setExpectedProfile,
   clearGitIdentity,
   clearLocalProfileMarker,
   applyProfileToGitConfig,
