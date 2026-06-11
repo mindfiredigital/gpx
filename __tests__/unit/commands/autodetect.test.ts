@@ -9,6 +9,7 @@ const { mocks } = vi.hoisted(() => ({
     applyProfileToGitConfig: vi.fn(),
     updateRemoteForProfile: vi.fn(),
     saveActive: vi.fn(),
+    getExpectedProfile: vi.fn(),
   },
 }));
 
@@ -19,6 +20,7 @@ vi.mock('../../../src/core/autodetect', () => ({
 vi.mock('../../../src/core/gitconfig', () => ({
   applyProfileToGitConfig: mocks.applyProfileToGitConfig,
   updateRemoteForProfile: mocks.updateRemoteForProfile,
+  getExpectedProfile: mocks.getExpectedProfile,
 }));
 
 vi.mock('../../../src/core/profileManagement/activeStore', () => ({
@@ -85,11 +87,9 @@ describe('autodetect command', () => {
     expect(code).toBe(ExitCode.SUCCESS);
     expect(mocks.applyProfileToGitConfig).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'work' }),
-      'global'
+      'local'
     );
-    expect(mocks.saveActive).toHaveBeenCalledWith(
-      expect.objectContaining({ global: 'work' })
-    );
+    expect(mocks.saveActive).not.toHaveBeenCalled();
     expect(consoleOutput.some((msg) => msg.includes('Auto-switched'))).toBe(true);
     expect(consoleOutput.some((msg) => msg.includes('personal'))).toBe(true);
     expect(consoleOutput.some((msg) => msg.includes('work'))).toBe(true);
