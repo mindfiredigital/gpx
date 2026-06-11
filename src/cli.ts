@@ -21,6 +21,8 @@ import { runImportCommand } from './commands/import';
 import { runEditCommand } from './commands/edit';
 import { runPatSetCommand, runPatClearCommand } from './commands/pat';
 import { runGitCredentialCommand } from './core/credentialManagement/gpxCredentialHelper';
+import { runGuardCommand } from './commands/guard';
+import { runVerifyCommitCommand } from './commands/verify-commit';
 import { password, select } from '@inquirer/prompts';
 
 await yargs(hideBin(process.argv))
@@ -288,6 +290,22 @@ await yargs(hideBin(process.argv))
         }
       )
       .demandCommand(1, 'Use: gpx pat set <profile> | gpx pat clear <profile>')
+  )
+  .command(
+    'guard',
+    'Protect current repository from accidental commits',
+    () => {},
+    async () => {
+      process.exitCode = await runGuardCommand();
+    }
+  )
+  .command(
+    'verify-commit',
+    false,
+    () => {},
+    async () => {
+      process.exitCode = await runVerifyCommitCommand();
+    }
   )
   // Internal command invoked by git credential helper - not shown in help
   .command(
