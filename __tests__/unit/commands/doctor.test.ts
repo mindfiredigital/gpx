@@ -13,6 +13,7 @@ const { mocks } = vi.hoisted(() => ({
     checkSshKey: vi.fn(),
     checkGpgKey: vi.fn(),
     checkRepoRemoteMatch: vi.fn(),
+    checkCommitGuard: vi.fn(),
   }
 }));
 
@@ -43,6 +44,10 @@ vi.mock('../../../src/utils/doctorCommandChecks/checkGpgKey', () => ({
 
 vi.mock('../../../src/utils/doctorCommandChecks/checkRepoRemoteMatch', () => ({
   checkRepoRemoteMatch: mocks.checkRepoRemoteMatch,
+}));
+
+vi.mock('../../../src/utils/doctorCommandChecks/checkCommitGuard', () => ({
+  checkCommitGuard: mocks.checkCommitGuard,
 }));
 
 const workProfile = {
@@ -92,6 +97,7 @@ beforeEach(() => {
     status: 'pass',
     message: 'Remote matches profile'
   });
+  mocks.checkCommitGuard.mockReturnValue(null);
 
   mocks.listProfiles.mockReturnValue([workProfile]);
   mocks.getProfile.mockReturnValue(workProfile);
