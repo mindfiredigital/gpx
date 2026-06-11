@@ -1,6 +1,5 @@
 import { detectProfileFromRepo } from '../core/autodetect';
-import { applyProfileToGitConfig } from '../core/gitconfig';
-import { saveActive } from '../core/profileManagement/activeStore';
+import { applyProfileToGitConfig, getExpectedProfile } from '../core/gitconfig';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printHuman } from '../utils/output';
 
@@ -37,12 +36,7 @@ export async function runAutoDetectCommand(json: boolean): Promise<number> {
 
     const profile = result.detectedProfile;
 
-    applyProfileToGitConfig(profile, 'global');
-
-    await saveActive({
-      global: profile.name,
-      switched_at: new Date().toISOString(),
-    });
+    applyProfileToGitConfig(profile, 'local');
 
     if (json) {
       printJson({
@@ -59,6 +53,10 @@ export async function runAutoDetectCommand(json: boolean): Promise<number> {
       printHuman(
         `Auto-switched: ${result.currentProfileName} -> ${profile.name} (${profile.display_name} <${profile.email}>)`
       );
+      const expectedProfile = getExpectedProfile();
+      if (!expectedProfile) {
+        printHuman(`💡 Tip: To prevent accidental commits, run 'gpx guard'`);
+      }
     }
 
     return ExitCode.SUCCESS;
