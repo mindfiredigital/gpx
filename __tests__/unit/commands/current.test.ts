@@ -45,7 +45,9 @@ const { mocks } = vi.hoisted(() => ({
       if (identity.email === 'ansuman@gmail.com') return 'work';
       return null;
     }),
-    hasIdentity: vi.fn((identity) => !!identity && !!identity.email)
+    hasIdentity: vi.fn((identity) => !!identity && !!identity.email),
+    checkCommitGuard: vi.fn(() => ({ status: 'pass', message: 'Enabled ✓', label: 'Commit Guard' })),
+    getGitRepoRoot: vi.fn(() => '/mock/repo/root')
   },
 }));
 
@@ -65,7 +67,12 @@ vi.mock('../../../src/core/gitconfig', () => ({
   isInsideGitRepo: mocks.isInsideGitRepo,
   applyProfileToGitConfig: mocks.applyProfileToGitConfig,
   findProfileNameByIdentity: mocks.findProfileNameByIdentity,
-  hasIdentity: mocks.hasIdentity
+  hasIdentity: mocks.hasIdentity,
+  getGitRepoRoot: mocks.getGitRepoRoot
+}));
+
+vi.mock('../../../src/utils/doctorCommandChecks/checkCommitGuard', () => ({
+  checkCommitGuard: mocks.checkCommitGuard
 }));
 
 let consoleOutput: string[] = [];
@@ -73,7 +80,7 @@ let consoleOutput: string[] = [];
 beforeEach(() => {
   vi.clearAllMocks();
   consoleOutput = [];
-  setOutputFlags({ json: false, quiet: false, color: true });
+  setOutputFlags({ json: false, quiet: false, color: false });
 
   vi.spyOn(console, 'log').mockImplementation((msg) => consoleOutput.push(msg));
   vi.spyOn(console, 'error').mockImplementation((msg) => consoleOutput.push(msg));
@@ -140,6 +147,8 @@ describe('current command - json', () => {
           email: 'ansuman@mindfire.com',
           signingKey: null,
         },
+        guard_status: 'pass',
+        guard_message: 'Enabled ✓',
       },
     });
   });
@@ -176,6 +185,8 @@ describe('current command - json', () => {
           name: 'Ansuman Mindfire',
           email: 'ansuman@mindfire.com',
         },
+        guard_status: 'pass',
+        guard_message: 'Enabled ✓',
       },
     });
   });
@@ -203,10 +214,9 @@ describe('current command - human', () => {
     const code = await runCurrentCommand(false);
 
     expect(code).toBe(ExitCode.SUCCESS);
-    expect(consoleOutput).toContain('Active profile: personal');
-    expect(consoleOutput).toContain('Scope: local');
-    expect(consoleOutput).toContain('Local profile: personal');
-    expect(consoleOutput).toContain('Local name: Ansuman Mindfire');
-    expect(consoleOutput).toContain('Local email: ansuman@mindfire.com');
+    expect(consoleOutput).toContain('Active profile: personal (local override)');
+    expect(consoleOutput).toContain('  Scope:  local (/mock/repo/root)');
+    expect(consoleOutput).toContain('  Name:   Ansuman Mindfire');
+    expect(consoleOutput).toContain('  Email:  ansuman@mindfire.com');
   });
 });
