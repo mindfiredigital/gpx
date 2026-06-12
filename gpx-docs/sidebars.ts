@@ -12,6 +12,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'commands/Add',
         'commands/Use',
+        'commands/Guard',
         'commands/Ls',
         'commands/Current',
         'commands/Remove',
