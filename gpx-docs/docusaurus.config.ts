@@ -45,7 +45,7 @@ const config: Config = {
       },
       {
         name: 'keywords',
-        content: 'gpx, git, profile, switcher, identity, ssh, cli, git profile manager, mindfire, mindfiredigital, open, source, opensource, foss, FOSS',
+        content: 'gpx, git, profile, switcher, identity, ssh, cli, git profile manager, mindfire, mindfiredigital, open, source, opensource',
       },
     ],
     colorMode: {
