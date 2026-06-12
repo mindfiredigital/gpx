@@ -1,6 +1,8 @@
 # Introduction
 
-**gpx** is a FOSS CLI tool that lets developers instantly switch between multiple Git identities on a single machine.
+**gpx** is a CLI tool that lets developers instantly switch between multiple Git identities on a single machine.
+
+> gpx is supported on **Windows**, **macOS**, and **Linux**.
 
 ---
 
@@ -22,7 +24,7 @@ Managing multiple Git identities today looks like this:
 | Forgetting which profile is active | Running `git config user.email` to check | 🟡 Med |
 | Per-repo identity setup | Repeating config in every new repo | 🟡 Med |
 
-No existing FOSS tool solves all of these together with a clean, fast CLI. **gpx does.**
+No existing tool solves all of these together with a clean, fast CLI. **gpx does.**
 
 ---
 
@@ -57,6 +59,8 @@ Under the hood, gpx manages `~/.gitconfig` and `~/.ssh/config` for you - atomica
 **PAT (HTTPS) authentication** - securely store and rotate Personal Access Tokens (PAT) in the OS-level keychain. gpx automatically handles Git HTTPS authentication requests, scoping credentials cleanly to the active profile.
 
 **Auto-detect** - configure a URL pattern per profile and gpx will automatically switch when you `cd` into a matching repo.
+
+**Commit Guard** - lock a repository to a specific profile with `gpx guard`. Any attempt to commit with the wrong identity is blocked before it happens.
 
 **Shell prompt badge** - always see the active profile in your terminal prompt.
 
