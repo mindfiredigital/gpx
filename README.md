@@ -4,11 +4,25 @@
 
 As a **nvm but for git profiles**. One command to switch your name, email, and SSH key across projects.
 
+📖 **Documentation:** [https://mindfiredigital.github.io/gpx/](https://mindfiredigital.github.io/gpx/)
+
 --- 
 
 ## Installation
+gpx is published on the npm registry. Install it globally using your preferred package manager:
+
 ```bash
+# Using npm
 npm install -g @mindfiredigital/gpx
+
+# Using yarn
+yarn global add @mindfiredigital/gpx
+
+# Using pnpm
+pnpm add -g @mindfiredigital/gpx
+
+# Using bun
+bun add -g @mindfiredigital/gpx
 ```
 
 ---
@@ -72,12 +86,12 @@ gpx rm work
 gpx rm work --force   # to remove currently active profile
 ```
 
-### `gpx run <name> -- <command>`
+### `gpx run <name> <command>`
 Run a single command temporarily under a different profile, then restore.
 
 ```bash
-gpx run personal -- git commit -m "minor change"        # changes 3892 lines of code🫤
-gpx run work -- git push origin main
+gpx run personal git commit -m "minor change"        # changes 39892 lines of code🫤
+gpx run work git push origin main
 ```
 
 ### `gpx doctor [name]`
