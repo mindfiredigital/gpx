@@ -1,34 +1,68 @@
-## Export profiles
-### Commands
-### Export to file
-```
-gpx export -o <export_profile_path.json>
+# Export Profiles
+
+Export all your saved profiles to a JSON file. This is highly recommended when setting up a new machine or backing up your configuration.
+
+## Usage
+
+```bash
+gpx export
 ```
 
-### Include SSH public key content
-```
-gpx export --include-public-keys -o <export_profile_path.json>
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `-o, --output <file>` | Path to save the JSON export file |
+| `--include-public-keys` | Include the content of your SSH public keys in the export |
+| `--json` | Return structured JSON output to the terminal instead of writing a file |
+
+## Examples
+
+### Export to a file
+
+```bash
+gpx export -o my-profiles.json
 ```
 
-### JSON format
-```
-gpx export --json -o <export_profile_path.json>
+### Export with public keys included
+
+If you plan to import these profiles on a machine that already has the private keys, including the public key content is useful.
+
+```bash
+gpx export --include-public-keys -o backup.json
 ```
 
-### **Expected output**
-```
+### JSON Format Structure
+
+If you inspect the exported file, or run with `--json`, the structure looks like this:
+
+```json
 {
   "profiles": [
     {
-      "name": "<profile_name>",
-      "display_name": "<profile_display_name>",
-      "email": "<profile_email>",
-      "ssh_key": "<profile_ssh_key_path>",
-      "gpg_key": <null/gpg_key>,
-      "signing_commits": <false/true>,
-      "created_at": "<time>"
+      "name": "work",
+      "display_name": "Ada Lovelace",
+      "email": "ada@company.com",
+      "ssh_key": "~/.ssh/id_ed25519_gpx_work",
+      "gpg_key": null,
+      "signing_commits": false,
+      "auth_method": "ssh",
+      "created_at": "2024-03-12T10:00:00.000Z"
     }
   ],
-  "exported_at": "<exported_at>"
+  "exported_at": "2024-03-14T15:30:00.000Z"
 }
 ```
+
+:::warning[WARNING]
+> **Security:** For security reasons, `gpx export` **does not** export your Personal Access Tokens (PATs) or private SSH keys. <br/> 
+> When you import profiles on a new machine, you must copy your SSH keys manually, and <br/> run `gpx pat set <profile>` to re-enter your PATs.
+:::
+
+## What happens behind the scenes
+
+gpx reads your `~/.gpx/profiles.json` and packages it into a portable format. If `--include-public-keys` is used, it reads the `.pub` file corresponding to your `ssh_key` path and embeds it in the JSON.
+
+## Related commands
+
+- [`gpx import`](./Import.md) - Import profiles from a JSON file.
