@@ -1,57 +1,84 @@
-## Create a new profile
+# Add Profile
 
-### Commands
+Create a new profile with either SSH or PAT (HTTPS) authentication.
+
+## Usage
+
 ```bash
 gpx add <profile_name>
 ```
-* **Interactive Mode**: Prompts you to select the authentication method (**SSH** or **PAT**). 
-  * If **SSH** is selected, it scans `~/.ssh` and asks if you want to generate a new key or choose an existing key.
-  * If **PAT** is selected, it prompts you to securely enter your Personal Access Token.
 
----
+![Adding a new profile interactively](/img/gpx-add-interactive.png)
 
-### Non-Interactive Mode (all fields via flags)
+## Options
 
-#### SSH Profile
+| Option | Description |
+|--------|-------------|
+| `--auth-method [ssh/pat]` | The authentication method to use for this profile |
+| `--display-name [name]` | The name that will appear on your Git commits |
+| `--email [email]` | The email that will appear on your Git commits |
+| `--ssh-key [path]` | Path to an existing SSH private key to use |
+| `--generate-ssh` | Automatically generate a new SSH key pair for this profile |
+| `--pat [token]` | Provide a Personal Access Token (PAT) securely |
+| `--gpg-key [key]` | GPG key ID for signing commits |
+| `--signing` | Enable GPG commit signing |
+| `--no-interactive` | Disable prompts (useful for scripts and CI) |
+
+## Examples
+
+### Interactive Mode
+
+The easiest way to add a profile is interactively. gpx will prompt you to select an authentication method, enter your name and email, and either generate an SSH key, select an existing one, or enter a PAT.
+
 ```bash
-gpx add <profile_name> \
-  --auth-method ssh \
-  --display-name "<github_username>" \
-  --email "<github_email>" \
-  --ssh-key <~/.ssh/private_key_path> \
-  --gpg-key <gpg_key> \
-  --signing \
-  --no-interactive
+gpx add work
 ```
 
-#### SSH Profile (With Auto SSH-Key Generation)
+### Non-Interactive SSH Profile (Generate new key)
+
 ```bash
-gpx add <profile_name> \
+gpx add work \
   --auth-method ssh \
-  --display-name "<github_username>" \
-  --email "<github_email>" \
+  --display-name "Ada Lovelace" \
+  --email "ada@company.com" \
   --generate-ssh \
   --no-interactive
 ```
 
-#### PAT Profile
+### Non-Interactive SSH Profile (Use existing key)
+
 ```bash
-gpx add <profile_name> \
-  --auth-method pat \
-  --display-name "<github_username>" \
-  --email "<github_email>" \
-  --pat "<token>" \
-  --gpg-key <gpg_key> \
+gpx add personal \
+  --auth-method ssh \
+  --display-name "Alan Turing" \
+  --email "alan@gmail.com" \
+  --ssh-key ~/.ssh/id_ed25519_personal \
+  --gpg-key ABC123DEF456 \
   --signing \
   --no-interactive
 ```
 
-### **Expected output:**
+### Non-Interactive PAT Profile
+
+
+```bash
+gpx add freelance \
+  --auth-method pat \
+  --display-name "Ada Freelance" \
+  --email "ada@clientco.com" \
+  --pat "github_pat_11ABC..." \
+  --no-interactive
 ```
-Profile added: <profile_name>
-```
 
----
+## What happens behind the scenes
 
+When you add a new profile:
+1. **For SSH profiles:** gpx registers the new identity. If you chose to generate an SSH key, it creates an `id_ed25519` key pair. It then creates a dedicated `Host` block in `~/.ssh/config` so SSH automatically knows to use this key when cloning via the gpx host alias.
+2. **For PAT profiles:** gpx validates your PAT against the GitHub API, retrieves your GitHub username, and securely stores the PAT in your OS native credential manager.
+3. The profile details are saved to `~/.gpx/profiles.json`.
 
-#### **NOTE** - `Windows Machines don't support gpx-pat-profiles, yet`
+## Related commands
+
+- [`gpx ls`](./Ls.md) - List all saved profiles.
+- [`gpx edit`](./Edit.md) - Edit the details of an existing profile.
+- [`gpx remove`](./Remove.md) - Delete a profile.
