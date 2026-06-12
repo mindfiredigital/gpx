@@ -1,42 +1,74 @@
-## Show profile details
-### Commands
-### Display the details of a profile
-```
-gpx show <existing_profile_name>
+# Profile Detail
+
+Display the full details of a specific saved profile.
+
+## Usage
+
+```bash
+gpx show <profile_name>
 ```
 
-### **Expected output:**
-```
-Profile: <existing_profile_name>
-Display name: <existing_profile_display_name>
-Email: <existing_profile_email>
-SSH key: <existing_profile_private_ssh_key_path>
-GPG key: <gpg_key/not set>
-Signing commits: <disabled/enabled>
-Created at: <time>
-Last used at: <time>
-Active: <yes/no>
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--json` | Return structured JSON output |
+
+## Examples
+
+### Display profile details
+
+```bash
+gpx show work
 ```
 
-### Display the details of a profile (json)
+Expected output:
 ```
-gpx show <existing_profile_name> --json
+Profile: work
+Display name: Ada Lovelace
+Email: ada@company.com
+Auth Method: ssh
+SSH key: ~/.ssh/id_ed25519_gpx_work
+GPG key: not set
+Signing commits: disabled
+Created at: 3/14/2024, 10:00:00 AM
+Last used at: 4/01/2024, 2:30:00 PM
+Active: yes
 ```
 
-### **Expected output:**
+### Structured JSON output
+
+```bash
+gpx show work --json
 ```
+
+Expected output:
+```json
 {
-  "success": <true/false>,
+  "success": true,
   "data": {
     "profile": {
-      "name": "<profile_name>",
-      "display_name": "<profile_display_name>",
-      "email": "<profile_email>",
-      "ssh_key": "<profile_private_key_path/null>",
-      "signing_commits": <false/true>,
-      "created_at": "<time>"
+      "name": "work",
+      "display_name": "Ada Lovelace",
+      "email": "ada@company.com",
+      "auth_method": "ssh",
+      "ssh_key": "~/.ssh/id_ed25519_gpx_work",
+      "gpg_key": null,
+      "signing_commits": false,
+      "github_username": "ada-lovelace",
+      "created_at": "2024-03-14T10:00:00.000Z",
+      "last_used_at": "2024-04-01T14:30:00.000Z"
     },
-    "active": <true/false>
+    "active": true
   }
 }
 ```
+
+## What happens behind the scenes
+
+gpx simply reads the profile configuration from `~/.gpx/profiles.json` and `~/.gpx/active.json` to format the display.
+
+## Related commands
+
+- [`gpx ls`](./Ls.md) - List all saved profiles.
+- [`gpx edit`](./Edit.md) - Edit the details of this profile.
