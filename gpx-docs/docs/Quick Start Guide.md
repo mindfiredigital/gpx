@@ -16,7 +16,7 @@ This guide covers **3 scenarios** for adding and using git profiles:
 
 - **Git** installed (`git --version` → 2.28 or later)
 - **gpx** installed (`gpx --version`)
-- A GitHub account (or any Git hosting provider for SSH)
+- A GitHub account
 
 ---
 
@@ -303,10 +303,19 @@ gpx current
 
 ```
 Active profile: work
-Scope: global
-Auth method: ssh
-Global name: Ada Lovelace
-Global email: ada@company.com
+  Name:   Ada Lovelace
+  Email:  ada@company.com
+  Scope:  global
+```
+
+If you're inside a repository with a local override:
+
+```
+Active profile: freelance (local override)
+  Name:   A. Lovelace
+  Email:  ada@clientco.com
+  Scope:  local (~/projects/client-app)
+  Global: work (Ada Lovelace <ada@company.com>)
 ```
 
 ### View full profile details
@@ -370,7 +379,7 @@ See the active profile in your terminal prompt:
 
 ```bash
 # For Zsh
-gpx init --shell zsh >> ~/.zshrc
+gpx init --shell zsh
 source ~/.zshrc
 
 # For Bash
@@ -383,6 +392,29 @@ Your prompt will show:
 ```
 [work] ~/projects/company-app $
 [personal] ~/projects/side-project $
+```
+
+### Protect a repo from wrong commits
+
+```bash
+# Lock the repo to the current profile
+gpx guard
+```
+
+```
+Locked this repository to the 'work' profile.
+Commit guard activated! 🛡️
+```
+
+Now if you accidentally try to commit with the wrong profile:
+
+```
+✗ Commit Blocked!
+You are trying to commit with 'personal'
+Commits are allowed to the profile : 'work'
+
+Please switch to the correct profile,
+Run: gpx use work
 ```
 
 ---
@@ -405,6 +437,9 @@ Your prompt will show:
 │    gpx use <name>              Switch global profile           │
 │    gpx use <name> --local      Switch for current repo only    │
 │    gpx current                 Show active profile             │
+│                                                                │
+│  COMMIT GUARD                                                  │
+│    gpx guard                   Lock repo to current profile    │
 │                                                                │
 │  PAT MANAGEMENT                                                │
 │    gpx pat set <name>          Set/rotate PAT for a profile    │
