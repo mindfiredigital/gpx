@@ -4,7 +4,6 @@ import { ExitCode } from '../lib/constants';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { handleCommandError, printHuman, printJson, fmt } from '../utils/output';
 import { hasPatForProfile } from '../core/credentialManagement/credentialStore';
-import { PLATFORM } from '../lib/constants';
 
 export const runShowCommand = async (profileName: string, json: boolean): Promise<number> => {
   try {
@@ -17,7 +16,7 @@ export const runShowCommand = async (profileName: string, json: boolean): Promis
 
     // For PAT profiles, check if PAT is stored in keychain
     let patConfigured: boolean | null = null;
-    if (profile.auth_method === 'pat' && PLATFORM !== 'win32') {
+    if (profile.auth_method === 'pat') {
       patConfigured = await hasPatForProfile(profileName);
     }
 
@@ -45,13 +44,9 @@ export const runShowCommand = async (profileName: string, json: boolean): Promis
 
     if (profile.auth_method === 'pat') {
       humanOutputData.push(`GitHub username: ${profile.github_username ?? 'not set'}`);
-      if (PLATFORM === 'win32') {
-        humanOutputData.push(`PAT: not supported on Windows`);
-      } else {
-        humanOutputData.push(
-          `PAT: ${patConfigured ? fmt.green('configured ✓') : fmt.red('not configured ✗')}`
-        );
-      }
+      humanOutputData.push(
+        `PAT: ${patConfigured ? fmt.green('configured ✓') : fmt.red('not configured ✗')}`
+      );
     }
 
     humanOutputData.push(

@@ -9,7 +9,6 @@ import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig
 import { validatePat } from '../core/githubManagement/validatePat';
 import { storePatForProfile } from '../core/credentialManagement/credentialStore';
 import { ensureCredentialHelperAdded } from '../core/credentialManagement/ensureHelper';
-import { PLATFORM } from '../lib/constants';
 
 const runSshAddCommand = async (args: AddArgs): Promise<number> => {
   try {
@@ -148,13 +147,6 @@ const runSshAddCommand = async (args: AddArgs): Promise<number> => {
 
 const runPatAddCommand = async (args: AddArgs): Promise<number> => {
   try {
-    if (PLATFORM === 'win32') {
-      throw new ProfileError(
-        'PAT authentication is not supported on Windows.',
-        ExitCode.INVALID_INPUT
-      );
-    }
-
     // Validate profile name
     const nameValidation = validateProfileName(args.name);
     if (!nameValidation.valid) {

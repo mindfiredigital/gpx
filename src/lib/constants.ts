@@ -23,6 +23,7 @@ const PROFILES_PATH: string = path.join(GPX_DIR, 'profiles.json');
 const ACTIVE_PATH: string = path.join(GPX_DIR, 'active.json');
 const CONFIG_PATH: string = path.join(GPX_DIR, 'config.json');
 const LOCK_PATH: string = path.join(GPX_DIR, '.lock');
+const CREDENTIALS_DIR: string = path.join(GPX_DIR, 'credentials');
 const CONFIG_DIR: string = path.join(os.homedir(), '.config', 'gpx');
 const CONFIG_FILE: string = path.join(CONFIG_DIR, 'config.json');
 
@@ -42,6 +43,7 @@ export {
   ACTIVE_PATH,
   CONFIG_PATH,
   LOCK_PATH,
+  CREDENTIALS_DIR,
   API_BASE,
   CONFIG_DIR,
   CONFIG_FILE,

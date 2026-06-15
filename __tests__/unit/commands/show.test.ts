@@ -102,21 +102,7 @@ describe('show command', () => {
         });
     });
 
-    it('should show PAT as not supported on Windows', async () => {
-        mockPlatform = 'win32';
-        mocks.getProfile.mockReturnValue({
-            name: 'pat-profile',
-            display_name: 'PAT User',
-            email: 'ansuman@gmail.com',
-            auth_method: 'pat',
-            created_at: '2026-05-28',
-        });
 
-        const code = await runShowCommand('pat-profile', false);
-
-        expect(code).toBe(ExitCode.SUCCESS);
-        expect(consoleOutput).toContain('PAT: not supported on Windows');
-    });
 
     it('should handle errors gracefully', async () => {
         mocks.getProfile.mockImplementation(() => {

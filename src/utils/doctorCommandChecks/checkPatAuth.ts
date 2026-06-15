@@ -1,27 +1,18 @@
 import type { CheckResult } from '../../lib/types/CheckResult.type';
 import type { Profile } from '../../lib/types/Profile.type';
 import { hasPatForProfile } from '../../core/credentialManagement/credentialStore';
-import { PLATFORM, GPX_CREDENTIAL_HELPER } from '../../lib/constants';
+import { GPX_CREDENTIAL_HELPER } from '../../lib/constants';
 import { spawnSync } from 'node:child_process';
 
 export const checkPatAuth = async (profile: Profile): Promise<CheckResult[]> => {
   const results: CheckResult[] = [];
-
-  if (PLATFORM === 'win32') {
-    results.push({
-      label: `PAT auth [${profile.name}]`,
-      status: 'fail',
-      message: 'PAT authentication is not supported on Windows',
-    });
-    return results;
-  }
 
   const patPresent = await hasPatForProfile(profile.name);
   results.push({
     label: `PAT stored [${profile.name}]`,
     status: patPresent ? 'pass' : 'fail',
     message: patPresent
-      ? 'PAT found in OS keychain'
+      ? 'PAT found in credential store'
       : `No PAT found. Run: gpx pat set ${profile.name}`,
   });
 

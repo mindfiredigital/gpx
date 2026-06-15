@@ -1,20 +1,29 @@
 import { spawnSync } from 'node:child_process';
-import { PLATFORM, SERVICE } from '../../lib/constants';
+import { PLATFORM, SERVICE, CREDENTIALS_DIR } from '../../lib/constants';
 import { ExitCode } from '../../lib/constants';
 import { ProfileError } from '../profileManagement/errorClass';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const showErrorOnWindows = (): void => {
-  if (PLATFORM === 'win32') {
-    throw new ProfileError(
-      `PAT Authentication is not supported on Windows.`,
-      ExitCode.INVALID_INPUT
-    );
+const getCredentialFilePath = (profileName: string): string => {
+  return path.join(CREDENTIALS_DIR, `${profileName}.json`);
+};
+
+const ensureCredentialsDir = (): void => {
+  if (!fs.existsSync(CREDENTIALS_DIR)) {
+    fs.mkdirSync(CREDENTIALS_DIR, { recursive: true });
   }
 };
 
 const storePatForProfile = async (profileName: string, pat: string): Promise<void> => {
   try {
-    showErrorOnWindows();
+    if (PLATFORM === 'win32') {
+      ensureCredentialsDir();
+      const filePath = getCredentialFilePath(profileName);
+      fs.writeFileSync(filePath, JSON.stringify({ pat }), { encoding: 'utf-8' });
+      return;
+    }
+
     if (PLATFORM === 'darwin') {
       spawnSync('security', [
         'delete-generic-password',
@@ -81,9 +90,21 @@ const storePatForProfile = async (profileName: string, pat: string): Promise<voi
 };
 
 const getPatForProfile = async (profileName: string): Promise<string | null> => {
-  showErrorOnWindows();
-
   try {
+    if (PLATFORM === 'win32') {
+      const filePath = getCredentialFilePath(profileName);
+      if (fs.existsSync(filePath)) {
+        try {
+          const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+          const parsed = JSON.parse(content);
+          return parsed.pat || null;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+
     let commandString: { command: string; args: string[] } | undefined;
 
     if (PLATFORM === 'darwin') {
@@ -114,9 +135,15 @@ const getPatForProfile = async (profileName: string): Promise<string | null> => 
 };
 
 const deletePatForProfile = async (profileName: string): Promise<void> => {
-  showErrorOnWindows();
-
   try {
+    if (PLATFORM === 'win32') {
+      const filePath = getCredentialFilePath(profileName);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return;
+    }
+
     if (PLATFORM === 'darwin') {
       spawnSync('security', [
         'delete-generic-password',

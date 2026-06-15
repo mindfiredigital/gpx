@@ -11,7 +11,7 @@ import {
   httpsToSshAlias,
   safeGit,
 } from '../core/gitconfig';
-import { ExitCode, PLATFORM } from '../lib/constants';
+import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printSuccess, printWarn } from '../utils/output';
 import { ProfileError } from '../core/profileManagement/errorClass';
 import { upsertSshConfigForProfile } from '../core/sshConfigManagement/sshconfig';
@@ -91,13 +91,6 @@ export const runUseCommand = async (
         }
       }
     } else if (authMethod === 'pat') {
-      if (PLATFORM === 'win32') {
-        throw new ProfileError(
-          'PAT authentication is not supported on Windows.',
-          ExitCode.INVALID_INPUT
-        );
-      }
-
       ensureCredentialHelperAdded();
 
       if (local && isInsideGitRepo()) {

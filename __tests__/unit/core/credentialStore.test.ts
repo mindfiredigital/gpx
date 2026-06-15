@@ -8,6 +8,7 @@ import {
 } from '../../../src/core/credentialManagement/credentialStore';
 import { ProfileError } from '../../../src/core/profileManagement/errorClass';
 import * as constants from '../../../src/lib/constants';
+import fs from 'node:fs';
 
 vi.mock('../../../src/lib/constants', async (importOriginal) => {
   const original = await importOriginal<any>();
@@ -21,28 +22,59 @@ vi.mock('node:child_process', () => ({
   spawnSync: vi.fn(),
 }));
 
+vi.mock('node:fs', () => ({
+  default: {
+    existsSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    readFileSync: vi.fn(),
+    unlinkSync: vi.fn(),
+  }
+}));
+
 describe('credentialStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (constants as any).PLATFORM = 'darwin';
   });
 
-  describe('Windows platform validation', () => {
+  describe('Windows platform operations', () => {
     beforeEach(() => {
       (constants as any).PLATFORM = 'win32';
+      vi.mocked(fs.existsSync).mockReturnValue(false);
     });
 
-    it('should throw ProfileError for storePatForProfile on Windows', async () => {
-      await expect(storePatForProfile('work', 'ghp_token')).rejects.toThrow(ProfileError);
-      await expect(storePatForProfile('work', 'ghp_token')).rejects.toThrow('PAT Authentication is not supported on Windows.');
+    it('should successfully store PAT on Windows', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+      await storePatForProfile('work', 'ghp_win_token');
+      expect(fs.mkdirSync).toHaveBeenCalledWith(constants.CREDENTIALS_DIR, { recursive: true });
+      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('work.json'), JSON.stringify({ pat: 'ghp_win_token' }), { encoding: 'utf-8' });
     });
 
-    it('should throw ProfileError for getPatForProfile on Windows', async () => {
-      await expect(getPatForProfile('work')).rejects.toThrow(ProfileError);
+    it('should return PAT if found on Windows', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ pat: 'ghp_retrieved_win' }));
+      const token = await getPatForProfile('work');
+      expect(token).toBe('ghp_retrieved_win');
     });
 
-    it('should throw ProfileError for deletePatForProfile on Windows', async () => {
-      await expect(deletePatForProfile('work')).rejects.toThrow(ProfileError);
+    it('should return null if file invalid on Windows', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockImplementation(() => { throw new Error(); });
+      const token = await getPatForProfile('work');
+      expect(token).toBeNull();
+    });
+
+    it('should return null if file does not exist on Windows', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+      const token = await getPatForProfile('work');
+      expect(token).toBeNull();
+    });
+
+    it('should delete PAT on Windows', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      await deletePatForProfile('work');
+      expect(fs.unlinkSync).toHaveBeenCalledWith(expect.stringContaining('work.json'));
     });
   });
 

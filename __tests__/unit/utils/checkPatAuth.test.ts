@@ -39,17 +39,7 @@ describe('checkPatAuth', () => {
     mockPlatform = 'darwin';
   });
 
-  it('should return fail result on Windows', async () => {
-    mockPlatform = 'win32';
-    const results = await checkPatAuth(mockProfile);
 
-    expect(results).toHaveLength(1);
-    expect(results[0]).toEqual({
-      label: 'PAT auth [pat-profile]',
-      status: 'fail',
-      message: 'PAT authentication is not supported on Windows',
-    });
-  });
 
   it('should pass PAT stored check if PAT is present in keychain', async () => {
     vi.mocked(hasPatForProfile).mockResolvedValue(true);
@@ -64,7 +54,7 @@ describe('checkPatAuth', () => {
     expect(results[0]).toEqual({
       label: 'PAT stored [pat-profile]',
       status: 'pass',
-      message: 'PAT found in OS keychain',
+      message: 'PAT found in credential store',
     });
     expect(results[1]).toEqual({
       label: 'Git credential helper [pat-profile]',

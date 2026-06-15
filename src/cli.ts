@@ -9,7 +9,7 @@ import { runCurrentCommand } from './commands/current';
 import { runRemoveCommand } from './commands/remove';
 import { runShowCommand } from './commands/show';
 import { runInitCommand } from './commands/init';
-import { setOutputFlags } from './utils/output';
+import { setOutputFlags, fmt, printError } from './utils/output';
 import type { GlobalCliOptions } from './lib/types/GpxConfig.type';
 import { runCompletionCommand } from './commands/completion';
 import { runRunCommand } from './commands/run';
@@ -22,7 +22,6 @@ import { runEditCommand } from './commands/edit';
 import { runPatSetCommand, runPatClearCommand } from './commands/pat';
 import { runGitCredentialCommand } from './core/credentialManagement/gpxCredentialHelper';
 import { password, select } from '@inquirer/prompts';
-import { PLATFORM } from './lib/constants';
 
 await yargs(hideBin(process.argv))
   .scriptName('gpx')
@@ -55,22 +54,19 @@ await yargs(hideBin(process.argv))
     async (argv: any) => {
       // Skip select() if --auth-method was provided via flag
       if (!argv.authMethod) {
-        if (PLATFORM === 'win32') {
-          argv.authMethod = 'ssh';
-        } else {
-          argv.authMethod = await select({
-            message: 'Add Profile using:',
-            choices: [
-              { name: 'Secure Shell (SSH)', value: 'ssh' },
-              { name: 'Personal Access Token (PAT)', value: 'pat' },
-            ],
-            theme: {
-              style: {
-                keysHelpTip: () => undefined,
-              },
+        argv.authMethod = await select({
+          message: 'Add Profile using:',
+          choices: [
+            { name: 'Secure Shell (SSH)', value: 'ssh' },
+            { name: 'Personal Access Token (PAT)', value: 'pat' },
+          ],
+          theme: {
+            style: {
+              answer: (text: string) => fmt.green(text),
+              keysHelpTip: () => undefined,
             },
-          });
-        }
+          },
+        });
       }
 
       if (argv.authMethod === 'ssh') {
@@ -89,7 +85,7 @@ await yargs(hideBin(process.argv))
       } else {
         // Skip password() prompt if --pat flag was provided directly
         if (!argv.pat) {
-          argv.pat = await password({ message: 'Enter Personal Access Token:' });
+          argv.pat = await password({ message: 'Enter Personal Access Token:', mask: '*' });
         }
         process.exitCode = await runPatAddCommand({
           name: argv.name,
@@ -310,4 +306,17 @@ await yargs(hideBin(process.argv))
   .demandCommand(1, 'Use a command. Try: gpx --help')
   .strict()
   .help()
+  .fail((msg, err, yargs) => {
+    if (err && (err.name === 'ExitPromptError' || err.message?.includes('User force closed'))) {
+      printError('\nCommand Terminated');
+      process.exit(1);
+    }
+    if (msg) {
+      yargs.showHelp();
+      printError(`\n${msg}`);
+    } else if (err) {
+      printError(`${err}`);
+    }
+    process.exit(1);
+  })
   .parseAsync();
