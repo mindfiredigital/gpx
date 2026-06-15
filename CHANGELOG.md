@@ -1,5 +1,24 @@
 # gpx
 
+## 2.0.0
+
+### Major Changes
+
+- 243daa4: major release @mindfiredigital/gpx
+
+  ### Features
+  - Initial stable release of the `@mindfiredigital/gpx` package.
+  - Added core commands for adding, removing, listing & switching between gpx profiles.
+  - Currenlty supports SSH-based cloned repos only.
+
+### Minor Changes
+
+- 243daa4: ### New Features
+  - Added Support for https-based clones.
+  - User can now choose the auth-method per-profile (ssh/pat).
+  - Secured storage Personal Access Token provided by the user in respective OS-level keychains.
+  - Supports in Linux + Mac, Windows support is in progress.
+
 ## 1.0.0
 
 ### Major Changes
