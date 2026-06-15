@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import type { Profile } from '../lib/types/Profile.type';
 import type { GitScope, GitIdentity, UpdateRemoteProfile } from '../lib/types/GpxConfig.type';
 import { ExitCode, HOME_DIR } from '../lib/constants';
@@ -8,14 +8,17 @@ import { backupFile } from './profileManagement/storeBackup';
 import { listProfiles } from './profileManagement/profiles';
 import { GPX_HOST_ALIAS_REGEX } from '../lib/validations';
 
-const run = (cmd: string): string => {
-  return execSync(cmd, { encoding: 'utf-8' }).trim();
+const git = (args: string[]): string => {
+  const result = spawnSync('git', args, { encoding: 'utf-8' });
+  if (result.status !== 0) {
+    throw new Error(result.stderr || `git command failed with status ${result.status}`);
+  }
+  return result.stdout.trim();
 };
 
-const safeGet = (cmd: string): string | null => {
+const safeGit = (args: string[]): string | null => {
   try {
-    const value = run(cmd);
-    return value || null;
+    return git(args);
   } catch {
     return null;
   }
@@ -25,9 +28,17 @@ const scopeFlag = (scope: GitScope): '--global' | '--local' => {
   return scope === 'local' ? '--local' : '--global';
 };
 
+const unsetConfigValue = (flag: '--global' | '--local', key: string): void => {
+  try {
+    git(['config', flag, '--unset', key]);
+  } catch {
+    /* catch unset errors */
+  }
+};
+
 const ensureGitInstalled = (): void => {
   try {
-    run('git --version');
+    git(['--version']);
   } catch {
     throw new ProfileError('git is not installed', ExitCode.GIT_NOT_INSTALLED);
   }
@@ -35,7 +46,7 @@ const ensureGitInstalled = (): void => {
 
 const getGitVersion = (): string => {
   ensureGitInstalled();
-  return run('git --version');
+  return git(['--version']);
 };
 
 const hasIdentity = (identity: GitIdentity): boolean => {
@@ -61,9 +72,9 @@ const getCurrentGitIdentity = (scope: GitScope = 'global'): GitIdentity => {
 
   const flag = scopeFlag(scope);
   return {
-    name: safeGet(`git config ${flag} --get user.name`),
-    email: safeGet(`git config ${flag} --get user.email`),
-    signingKey: safeGet(`git config ${flag} --get user.signingkey`),
+    name: safeGit(['config', flag, '--get', 'user.name']),
+    email: safeGit(['config', flag, '--get', 'user.email']),
+    signingKey: safeGit(['config', flag, '--get', 'user.signingkey']),
   };
 };
 
@@ -72,7 +83,7 @@ const getGpxLocalProfileName = (): string | null => {
 
   if (!isInsideGitRepo()) return null;
 
-  return safeGet(`git config --local --get gpx.profile`);
+  return safeGit(['config', '--local', '--get', 'gpx.profile']);
 };
 
 const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): void => {
@@ -88,38 +99,57 @@ const applyProfileToGitConfig = (profile: Profile, scope: GitScope = 'global'): 
     backupFile(gitConfigPath, 'backup');
   }
 
-  run(`git config ${flag} user.name "${profile.display_name}"`);
-  run(`git config ${flag} user.email "${profile.email}"`);
+  git(['config', flag, 'user.name', profile.display_name]);
+  git(['config', flag, 'user.email', profile.email]);
 
-  if (scope === 'local') run(`git config ${flag} gpx.profile "${profile.name}"`);
+  if (scope === 'local') git(['config', flag, 'gpx.profile', profile.name]);
 
   if (profile.gpg_key) {
-    run(`git config ${flag} user.signingkey "${profile.gpg_key}"`);
+    git(['config', flag, 'user.signingkey', profile.gpg_key]);
   } else {
-    const existingSigningKey = safeGet(`git config ${flag} --get user.signingkey`);
-    if (existingSigningKey) run(`git config ${flag} --unset user.signingkey`);
+    const existingSigningKey = safeGit(['config', flag, '--get', 'user.signingkey']);
+    if (existingSigningKey) git(['config', flag, '--unset', 'user.signingkey']);
   }
 
   if (profile.signing_commits === true) {
-    run(`git config ${flag} commit.gpgsign true`);
+    git(['config', flag, 'commit.gpgsign', 'true']);
   } else {
-    run(`git config ${flag} commit.gpgsign false`);
+    git(['config', flag, 'commit.gpgsign', 'false']);
   }
+};
+
+const clearGitIdentity = (scope: GitScope = 'global'): void => {
+  ensureGitInstalled();
+
+  if (scope === 'local' && !isInsideGitRepo()) return;
+
+  const flag = scopeFlag(scope);
+
+  unsetConfigValue(flag, 'user.name');
+  unsetConfigValue(flag, 'user.email');
+  unsetConfigValue(flag, 'user.signingkey');
+  unsetConfigValue(flag, 'commit.gpgsign');
 };
 
 const isInsideGitRepo = (): boolean => {
   ensureGitInstalled();
   try {
-    return run('git rev-parse --is-inside-work-tree') === 'true';
+    return git(['rev-parse', '--is-inside-work-tree']) === 'true';
   } catch {
     return false;
   }
 };
 
+const clearLocalProfileMarker = (): void => {
+  ensureGitInstalled();
+  if (!isInsideGitRepo()) return;
+  unsetConfigValue('--local', 'gpx.profile');
+};
+
 const getGitRepoRoot = (): string | null => {
   ensureGitInstalled();
   try {
-    return run('git rev-parse --show-toplevel');
+    return git(['rev-parse', '--show-toplevel']);
   } catch {
     return null;
   }
@@ -127,7 +157,7 @@ const getGitRepoRoot = (): string | null => {
 
 const getRemoteUrl = (remoteName: string = 'origin'): string | null => {
   if (!isInsideGitRepo()) return null;
-  return safeGet(`git remote get-url ${remoteName}`);
+  return safeGit(['remote', 'get-url', remoteName]);
 };
 
 const getGpxProfileFromRemote = (remoteUrl: string): string | null => {
@@ -148,9 +178,11 @@ const updateRemoteForProfile = (
 ): UpdateRemoteProfile => {
   const result: UpdateRemoteProfile = { updated: [], httpsWarnings: [] };
 
+  if (scope !== 'local') return result;
+
   if (!isInsideGitRepo()) return result;
 
-  const remotesRaw = safeGet('git remote');
+  const remotesRaw = safeGit(['remote']);
   if (!remotesRaw) return result;
 
   const remotes = remotesRaw.split('\n').filter(Boolean);
@@ -176,21 +208,36 @@ const updateRemoteForProfile = (
       newUrl = url;
     }
 
-    run(`git remote set-url ${remote} "${newUrl}"`);
+    git(['remote', 'set-url', remote, newUrl]);
     result.updated.push({ remote, oldUrl: url, newUrl });
   }
 
   return result;
 };
 
+const sshAliasToHttps = (url: string): string | null => {
+  const match = url.match(/^git@github\.com-[^:]+:([^/]+\/[^.]+(?:\.git)?)$/);
+  if (!match || !match[1]) return null;
+  const repoPath = match[1].endsWith('.git') ? match[1] : `${match[1]}.git`;
+  return `https://github.com/${repoPath}`;
+};
+
+const httpsToSshAlias = (url: string, profileName: string): string | null => {
+  const match = url.match(/^https:\/\/github\.com\/([^/]+\/[^/]+?)(\.git)?$/);
+  if (!match || !match[1]) return null;
+  return `git@github.com-${profileName}:${match[1]}.git`;
+};
+
 export {
-  safeGet,
+  safeGit,
   ensureGitInstalled,
   getGitVersion,
   hasIdentity,
   findProfileNameByIdentity,
   getCurrentGitIdentity,
   getGpxLocalProfileName,
+  clearGitIdentity,
+  clearLocalProfileMarker,
   applyProfileToGitConfig,
   isInsideGitRepo,
   getGitRepoRoot,
@@ -198,4 +245,6 @@ export {
   getGpxProfileFromRemote,
   isHttpsRemote,
   updateRemoteForProfile,
+  sshAliasToHttps,
+  httpsToSshAlias,
 };

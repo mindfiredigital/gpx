@@ -28,8 +28,11 @@ export const runExportCommand = async (
         email: profile.email,
         ssh_key: profile.ssh_key,
         gpg_key: profile.gpg_key,
+        github_username: profile.github_username,
         signing_commits: profile.signing_commits,
+        auth_method: profile.auth_method,
         created_at: profile.created_at,
+        last_used_at: profile.last_used_at,
       };
 
       if (includePublicKeys && profile.ssh_key) {

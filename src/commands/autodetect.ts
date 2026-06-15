@@ -1,5 +1,5 @@
 import { detectProfileFromRepo } from '../core/autodetect';
-import { applyProfileToGitConfig, updateRemoteForProfile } from '../core/gitconfig';
+import { applyProfileToGitConfig } from '../core/gitconfig';
 import { saveActive } from '../core/profileManagement/activeStore';
 import { ExitCode } from '../lib/constants';
 import { handleCommandError, printJson, printHuman } from '../utils/output';
@@ -38,8 +38,6 @@ export async function runAutoDetectCommand(json: boolean): Promise<number> {
     const profile = result.detectedProfile;
 
     applyProfileToGitConfig(profile, 'global');
-
-    updateRemoteForProfile(profile.name);
 
     await saveActive({
       global: profile.name,

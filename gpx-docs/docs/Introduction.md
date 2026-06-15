@@ -19,8 +19,8 @@ Managing multiple Git identities today looks like this:
 | Wrong commits pushed under wrong email | Manual `git config user.email` per repo | 🔴 High |
 | Switching SSH keys per account | Editing `~/.ssh/config` manually | 🔴 High |
 | No visual indication of active profile | Zero - pure memory | 🔴 High |
-| Forgetting which profile is active | Running `git config user.email` to check | 🟡 Medium |
-| Per-repo identity setup | Repeating config in every new repo | 🟡 Medium |
+| Forgetting which profile is active | Running `git config user.email` to check | 🟡 Med |
+| Per-repo identity setup | Repeating config in every new repo | 🟡 Med |
 
 No existing FOSS tool solves all of these together with a clean, fast CLI. **gpx does.**
 
@@ -53,6 +53,8 @@ Under the hood, gpx manages `~/.gitconfig` and `~/.ssh/config` for you - atomica
 **Instant switching** - one command to switch your global identity or just the identity for the current repo.
 
 **SSH key management** - each profile carries its own SSH key. gpx automatically maintains the right `~/.ssh/config` blocks so the correct key is used per host.
+
+**PAT (HTTPS) authentication** - securely store and rotate Personal Access Tokens (PAT) in the OS-level keychain. gpx automatically handles Git HTTPS authentication requests, scoping credentials cleanly to the active profile.
 
 **Auto-detect** - configure a URL pattern per profile and gpx will automatically switch when you `cd` into a matching repo.
 

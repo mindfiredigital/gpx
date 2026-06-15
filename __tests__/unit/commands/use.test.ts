@@ -6,6 +6,7 @@ import { runUseCommand } from '../../../src/commands/use';
 const { mocks } = vi.hoisted(() => ({
   mocks: {
     getProfile: vi.fn(),
+    updateProfile: vi.fn(),
     saveActive: vi.fn(),
     applyProfileToGitConfig: vi.fn(),
     isInsideGitRepo: vi.fn(),
@@ -15,6 +16,7 @@ const { mocks } = vi.hoisted(() => ({
 
 vi.mock('../../../src/core/profileManagement/profiles', () => ({
   getProfile: mocks.getProfile,
+  updateProfile: mocks.updateProfile
 }));
 
 vi.mock('../../../src/core/profileManagement/activeStore', () => ({
@@ -25,6 +27,12 @@ vi.mock('../../../src/core/gitconfig', () => ({
   applyProfileToGitConfig: mocks.applyProfileToGitConfig,
   isInsideGitRepo: mocks.isInsideGitRepo,
   updateRemoteForProfile: mocks.updateRemoteForProfile,
+  getRemoteUrl: vi.fn(),
+  getGpxProfileFromRemote: vi.fn(),
+  isHttpsRemote: vi.fn(),
+  sshAliasToHttps: vi.fn(),
+  httpsToSshAlias: vi.fn(() => 'git@github.com-work:owner/repo.git'),
+  safeGit: vi.fn(),
 }));
 
 let consoleOutput: string[] = [];
@@ -33,12 +41,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   consoleOutput = [];
 
-  setOutputFlags({ json: false, quiet: false, noColor: true });
+  setOutputFlags({ json: false, quiet: false, color: false });
 
   mocks.getProfile.mockReturnValue({
     name: 'work',
     display_name: 'Ansuman Panda',
     email: 'ansuman@mindfire.com',
+    auth_method: 'ssh' as const,
     created_at: new Date(),
   });
 
@@ -113,7 +122,7 @@ describe('use command - remote URL rewriting', () => {
       ],
     });
 
-    const code = await runUseCommand('work', false, false);
+    const code = await runUseCommand('work', true, false);
 
     expect(code).toBe(ExitCode.SUCCESS);
     expect(consoleOutput.some((msg) => msg.includes('HTTPS'))).toBe(true);
@@ -122,7 +131,7 @@ describe('use command - remote URL rewriting', () => {
   it('should not update remotes when not inside a git repo', async () => {
     mocks.isInsideGitRepo.mockReturnValue(false);
 
-    const code = await runUseCommand('work', false, false);
+    const code = await runUseCommand('work', true, false);
 
     expect(code).toBe(ExitCode.SUCCESS);
     expect(mocks.updateRemoteForProfile).not.toHaveBeenCalled();
@@ -145,10 +154,11 @@ describe('use command - remote URL rewriting', () => {
       name: 'personal',
       display_name: 'ansumain',
       email: '2004.ansuman@gmail.com',
+      auth_method: 'ssh' as const,
       created_at: new Date(),
     });
 
-    const code = await runUseCommand('personal', false, true);
+    const code = await runUseCommand('personal', true, true);
 
     expect(code).toBe(ExitCode.SUCCESS);
     const result = JSON.parse(consoleOutput[0] as string);
