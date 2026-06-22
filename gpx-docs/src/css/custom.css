@@ -15,6 +15,7 @@
   --muted-fg: #636770;
   --card-bg: #ffffff;
   --card-border: #e8e8e8;
+  --grid-color: rgba(0, 0, 0, 0.15);
 }
 
 [data-theme='dark'] {
@@ -30,9 +31,11 @@
   --muted-fg: #a3a3a3;
   --card-bg: #111111;
   --card-border: #222222;
+  --grid-color: rgba(255, 255, 255, 0.05);
 }
 
 .navbar {
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
   box-shadow: none;
 }
