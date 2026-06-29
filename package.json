@@ -43,7 +43,7 @@
     "prepare": "husky",
     "changeset": "changeset",
     "release": "bun run build && changeset publish",
-    "version": "changeset version"
+    "version": "changeset version && bun install"
   },
   "resolutions": {
     "strip-ansi": "6.0.1",
