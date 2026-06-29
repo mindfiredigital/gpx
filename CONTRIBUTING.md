@@ -251,14 +251,21 @@ bun run lint:fix   # Auto-fix linting issues
 
 ## Release Process
 
-Maintainers handle releases. The process:
+- The CI pipeline uses **Automated Semantic Versioning**. 
+- Maintainers DO NOT need to manually run changeset or release scripts! 
+- Releases are automatically calculated and triggered purely based on commit messages.
 
-1. Merge all changes to `main` branch
-2. Maintainer runs release script:
-   ```bash
-   bun run release:publish
-   ```
-3. Automatically publishes to npm and GitHub Packages
+### How to Trigger a Release
+When merging Pull Requests into `main`, ensure the commit message follows these strict prefixes:
+
+- `fix: <message>` → **Patch Release** (v1.0.0 → v1.0.1) - *For bug fixes*
+- `feat: <message>` → **Minor Release** (v1.0.0 → v1.1.0) - *For new features*
+- `feat!: <message>` or `fix!: <message>` → **Major Release** (v1.0.0 → v2.0.0) - *For breaking changes*
+
+### The Final Approval
+1. When a `feat` or `fix` is merged to `main`, the CI automatically opens a **"Version Packages"** Pull Request.
+2. A maintainer simply **Approves and Merges** that PR.
+3. The GitHub Action automatically bumps the package version, generates the Release Notes, and publishes to npm!
 
 ## Getting Help
 
